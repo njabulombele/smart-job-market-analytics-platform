@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jobmarket-frontend
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: jobmarket-frontend
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: jobmarket-frontend
+  template:
+    metadata:
+      labels:
+        app: jobmarket-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: "{{ .Values.registry }}/{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NEXT_PUBLIC_API_URL
+              value: "/api/v1"
+          resources:
+            {{- toYaml .Values.frontend.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jobmarket-frontend
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: jobmarket-frontend
+  ports:
+    - port: {{ .Values.frontend.service.port }}
+      targetPort: 3000
+  type: {{ .Values.frontend.service.type }}

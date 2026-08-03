@@ -1,0 +1,49 @@
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+.mvn/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+frontend/.env.local
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Environment files — never commit secrets
+.env
+.env.*
+!.env.example
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfvars
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# Docker
+*.log
+
+# ML models
+ml-service/models/*.joblib
+ml-service/models/*.pkl
+data-pipeline/data/
+/tmp/jobmarket/
