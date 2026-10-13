@@ -64,7 +64,7 @@ server:
     include-binding-errors: never
 
 jwt:
-  secret: ${JWT_SECRET:your-very-long-secret-key-minimum-32-characters-long}
+  secret: ${JWT_SECRET:oL5LeP9RCA9924rTZGA5j3/v6GeDj/fsoTMcJ1++vBw=}
   access-expiry: ${JWT_ACCESS_EXPIRY:900000}       # 15 minutes
   refresh-expiry: ${JWT_REFRESH_EXPIRY:604800000}  # 7 days
 
