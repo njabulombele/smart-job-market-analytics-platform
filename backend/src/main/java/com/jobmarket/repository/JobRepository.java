@@ -16,14 +16,21 @@ import java.util.List;
 public interface JobRepository extends JpaRepository<Job, Long>,
                                         JpaSpecificationExecutor<Job> {
 
-    @Query("""
-        SELECT j FROM Job j
-        LEFT JOIN FETCH j.company
-        LEFT JOIN FETCH j.location
-        WHERE j.isActive = true
+    @Query(value = """
+        SELECT j.* FROM jobs j
+        LEFT JOIN companies c ON j.company_id = c.id
+        LEFT JOIN locations l ON j.location_id = l.id
+        WHERE j.is_active = true
         AND (to_tsvector('english', j.title || ' ' || COALESCE(j.description, ''))
              @@ plainto_tsquery('english', :query))
-        """)
+        """,
+        countQuery = """
+        SELECT COUNT(*) FROM jobs j
+        WHERE j.is_active = true
+        AND (to_tsvector('english', j.title || ' ' || COALESCE(j.description, ''))
+             @@ plainto_tsquery('english', :query))
+        """,
+        nativeQuery = true)
     Page<Job> fullTextSearch(@Param("query") String query, Pageable pageable);
 
     @Query("SELECT j FROM Job j WHERE j.isActive = true ORDER BY j.viewCount DESC")
