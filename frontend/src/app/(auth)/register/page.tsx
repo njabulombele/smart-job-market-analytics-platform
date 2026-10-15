@@ -6,25 +6,24 @@ import { z } from 'zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
-import { User, Mail, Lock, Eye, EyeOff, BarChart3 } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 
 const schema = z.object({
-  fullName: z.string().min(2, 'At least 2 characters'),
-  email:    z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Minimum 8 characters'),
+  fullName: z.string().min(2, 'Name must be at least 2 characters'),
+  email:    z.string().email('Enter a valid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
   confirm:  z.string(),
 }).refine(d => d.password === d.confirm, {
-  message: 'Passwords do not match',
-  path: ['confirm'],
+  message: 'Passwords do not match', path: ['confirm'],
 });
-
 type FormData = z.infer<typeof schema>;
 
 export default function RegisterPage() {
   const { register: registerUser, isLoading } = useAuthStore();
   const router = useRouter();
-  const [showPw, setShowPw] = useState(false);
+  const [showPw, setShowPw]     = useState(false);
+  const [showCf, setShowCf]     = useState(false);
 
   const { register, handleSubmit, formState: { errors }, setError } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -35,86 +34,138 @@ export default function RegisterPage() {
       await registerUser(data.email, data.password, data.fullName);
       router.push('/dashboard');
     } catch {
-      setError('root', { message: 'Registration failed. Email may already be in use.' });
+      setError('root', { message: 'Registration failed. This email may already be registered.' });
     }
   };
 
-  const fields = [
-    { id: 'fullName', label: 'Full Name',        type: 'text',     placeholder: 'Jane Doe',         icon: User },
-    { id: 'email',    label: 'Email address',     type: 'email',    placeholder: 'you@example.com',  icon: Mail },
-    { id: 'password', label: 'Password',          type: showPw ? 'text' : 'password', placeholder: '••••••••',        icon: Lock, toggle: true },
-    { id: 'confirm',  label: 'Confirm Password',  type: 'password', placeholder: '••••••••',        icon: Lock },
-  ] as const;
-
   return (
-    <div className="min-h-screen flex items-center justify-center
-                    bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 p-6">
-      {/* Blobs */}
-      <div className="fixed top-0 right-0 w-[600px] h-[600px] bg-blue-600/10 rounded-full
-                      -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
-      <div className="fixed bottom-0 left-0 w-[500px] h-[500px] bg-indigo-600/10 rounded-full
-                      translate-y-1/2 -translate-x-1/2 blur-3xl pointer-events-none" />
+    <div style={{ minHeight: '100vh', background: '#fff' }}>
 
-      <div className="relative z-10 w-full max-w-md">
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/40">
-            <BarChart3 size={20} className="text-white" />
+      {/* Top nav */}
+      <nav className="site-nav">
+        <Link href="/" className="site-nav-brand">Smart Job Market</Link>
+        <div className="flex-1" />
+        <Link href="/login"
+          style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-700)', textDecoration: 'none' }}>
+          Sign in
+        </Link>
+      </nav>
+
+      {/* Body */}
+      <div style={{
+        minHeight: 'calc(100vh - 56px)',
+        background: 'var(--gray-25)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 24,
+      }}>
+        <div style={{ width: '100%', maxWidth: 440 }}>
+
+          {/* Brand */}
+          <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--blue)', letterSpacing: -1, marginBottom: 4 }}>
+              Smart Job Market
+            </div>
+            <p style={{ fontSize: 15, color: 'var(--gray-400)' }}>
+              Create your free account
+            </p>
           </div>
-          <span className="text-xl font-bold text-white tracking-tight">JobMarket AI</span>
-        </div>
 
-        <div className="auth-card">
-          <div className="mb-7">
-            <h1 className="text-2xl font-bold text-slate-900">Create your account</h1>
-            <p className="text-slate-500 text-sm mt-1">Start exploring job market insights for free</p>
-          </div>
+          <div className="auth-panel">
+            <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--gray-900)', marginBottom: 4 }}>
+              Create your account
+            </h1>
+            <p style={{ fontSize: 13, color: 'var(--gray-400)', marginBottom: 20 }}>
+              Start exploring job market intelligence for free
+            </p>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {fields.map(({ id, label, type, placeholder, icon: Icon, ...rest }) => (
-              <div key={id}>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">{label}</label>
-                <div className="relative">
-                  <Icon size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    {...register(id as keyof FormData)}
-                    type={type}
-                    placeholder={placeholder}
-                    className="input pl-10 pr-10"
-                  />
-                  {'toggle' in rest && rest.toggle && (
-                    <button type="button" onClick={() => setShowPw(v => !v)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
-                      {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
-                    </button>
-                  )}
+            <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+              <div>
+                <label className="form-label">Full name</label>
+                <input {...register('fullName')} type="text" placeholder="Jane Doe"
+                  className="field" style={{ width: '100%' }} />
+                {errors.fullName && <p className="form-error">{errors.fullName.message}</p>}
+              </div>
+
+              <div>
+                <label className="form-label">Email address</label>
+                <input {...register('email')} type="email" placeholder="you@example.com"
+                  className="field" style={{ width: '100%' }} />
+                {errors.email && <p className="form-error">{errors.email.message}</p>}
+              </div>
+
+              <div>
+                <label className="form-label">Password</label>
+                <div style={{ position: 'relative' }}>
+                  <input {...register('password')} type={showPw ? 'text' : 'password'}
+                    placeholder="At least 8 characters"
+                    className="field" style={{ width: '100%', paddingRight: 44 }} />
+                  <button type="button" onClick={() => setShowPw(v => !v)}
+                    style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)',
+                             background:'none', border:'none', cursor:'pointer', color:'var(--gray-400)',
+                             display:'flex', alignItems:'center' }}>
+                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
-                {errors[id as keyof FormData] && (
-                  <p className="text-red-500 text-xs mt-1.5">{errors[id as keyof FormData]?.message}</p>
-                )}
+                {errors.password && <p className="form-error">{errors.password.message}</p>}
               </div>
-            ))}
 
-            {errors.root && (
-              <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3">
-                <p className="text-red-600 text-sm">{errors.root.message}</p>
+              <div>
+                <label className="form-label">Confirm password</label>
+                <div style={{ position: 'relative' }}>
+                  <input {...register('confirm')} type={showCf ? 'text' : 'password'}
+                    placeholder="Repeat your password"
+                    className="field" style={{ width: '100%', paddingRight: 44 }} />
+                  <button type="button" onClick={() => setShowCf(v => !v)}
+                    style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)',
+                             background:'none', border:'none', cursor:'pointer', color:'var(--gray-400)',
+                             display:'flex', alignItems:'center' }}>
+                    {showCf ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                {errors.confirm && <p className="form-error">{errors.confirm.message}</p>}
               </div>
-            )}
 
-            <button type="submit" disabled={isLoading} className="btn-primary w-full py-3 mt-1">
-              {isLoading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Creating account…
-                </span>
-              ) : 'Create Account'}
-            </button>
-          </form>
+              {errors.root && (
+                <div style={{ padding:'10px 14px', borderRadius:6,
+                              background:'var(--red-bg)', border:'1px solid var(--red-border)',
+                              fontSize:13, color:'var(--red)' }}>
+                  {errors.root.message}
+                </div>
+              )}
 
-          <p className="text-center text-sm text-slate-500 mt-6">
-            Already have an account?{' '}
-            <Link href="/login" className="text-blue-600 font-semibold hover:underline">Sign in</Link>
-          </p>
+              <button type="submit" disabled={isLoading}
+                className="btn btn-primary"
+                style={{ width: '100%', height: 46, fontSize: 15, borderRadius: 6 }}>
+                {isLoading ? (
+                  <>
+                    <span style={{ width:16, height:16, borderRadius:'50%',
+                                   border:'2px solid rgba(255,255,255,.3)', borderTopColor:'#fff',
+                                   animation:'spin .65s linear infinite', display:'inline-block' }} />
+                    Creating account…
+                  </>
+                ) : 'Create account'}
+              </button>
+            </form>
+
+            <p style={{ fontSize: 11, color: 'var(--gray-400)', textAlign: 'center', marginTop: 14, lineHeight: 1.5 }}>
+              By creating an account, you agree to Smart Job Market&apos;s Terms of Service,
+              Cookie Policy, and Privacy Policy.
+            </p>
+
+            <div style={{ display:'flex', alignItems:'center', gap:12, margin:'18px 0' }}>
+              <div style={{ flex:1, height:1, background:'var(--gray-200)' }} />
+              <span style={{ fontSize:12, color:'var(--gray-400)', fontWeight:600, textTransform:'uppercase', letterSpacing:'.06em' }}>or</span>
+              <div style={{ flex:1, height:1, background:'var(--gray-200)' }} />
+            </div>
+
+            <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--gray-600)' }}>
+              Already have an account?{' '}
+              <Link href="/login" style={{ color: 'var(--blue)', fontWeight: 700 }}>
+                Sign in
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
