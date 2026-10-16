@@ -7,7 +7,7 @@ import { Search, MapPin, TrendingUp, BarChart3, ChevronDown } from 'lucide-react
 import Link from 'next/link';
 
 const TRENDING = [
-  'Software Engineer', 'Data Analyst', 'Product Manager',
+  'Software Engineer', 'Java Developer', 'Data Analyst', 'Product Manager',
   'DevOps Engineer', 'Cloud Architect', 'Machine Learning',
 ];
 
@@ -38,37 +38,16 @@ export default function Home() {
           Smart Job Market
         </Link>
 
-        {/* Nav links */}
-        <div className="hidden md:flex items-center gap-6 flex-1">
-          <Link href="/" className="site-nav-link active">Home</Link>
-          <Link href="/jobs" className="site-nav-link">Find salaries</Link>
-          <Link href="/analytics" className="site-nav-link">Company reviews</Link>
-        </div>
+
 
         {/* Right actions */}
-        <div className="flex items-center gap-3 ml-auto">
-          {isAuthenticated ? (
-            <Link href="/dashboard" className="btn btn-primary btn-sm">
-              Dashboard
-            </Link>
-          ) : (
-            <>
-              <Link href="/login" className="site-nav-link">Sign in</Link>
-              <span style={{ color: 'var(--gray-200)' }}>|</span>
-              <span className="site-nav-link" style={{ fontSize: 13, color: 'var(--gray-400)' }}>
-                ZA &nbsp; En
-              </span>
-              <span style={{ color: 'var(--gray-200)' }}>|</span>
-              <Link href="/register" className="site-nav-link">Employers / Post Job</Link>
-            </>
-          )}
-        </div>
+
       </nav>
 
       {/* ── Hero: search section ── */}
       <section style={{ padding: '32px 24px 24px', maxWidth: 740, margin: '0 auto' }}>
 
-        {/* Search bar — exactly as Indeed */}
+        {/* Search bar */}
         <div className="search-bar">
           {/* What field */}
           <div style={{ position: 'relative', flex: 1 }}>
@@ -82,7 +61,7 @@ export default function Home() {
             />
             <input
               className="search-input"
-              placeholder="Job title, keywords, or company"
+              placeholder="Job name, skill, or company"
               value={what}
               onChange={e => setWhat(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && search()}
@@ -104,7 +83,7 @@ export default function Home() {
             />
             <input
               className="search-input"
-              placeholder='City, state, zip code, or "remote"'
+              placeholder='City, province, or country'
               value={where}
               onChange={e => setWhere(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && search()}
@@ -112,7 +91,7 @@ export default function Home() {
           </div>
 
           <button className="search-btn" onClick={search}>
-            Find jobs
+            Search
           </button>
         </div>
       </section>
@@ -120,21 +99,21 @@ export default function Home() {
       {/* ── Brand + CTA ── */}
       <section style={{ padding: '16px 24px 40px', textAlign: 'center' }}>
         <div style={{
-          fontSize: 52, fontWeight: 900, color: 'var(--blue)',
+          fontSize: 52, fontWeight: 900, color: 'green',
           letterSpacing: -2, lineHeight: 1, marginBottom: 12,
         }}>
           Smart Job Market
         </div>
         <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--gray-900)', marginBottom: 6 }}>
-          Your next job starts here
+            Discover Your Next Opportunity
         </p>
         <p style={{ fontSize: 14, color: 'var(--gray-400)', marginBottom: 24 }}>
-          Create an account or sign in to see your personalised job recommendations.
+            Explore career opportunities tailored to your skills and interests. Sign in or create an account to find jobs that match your goals.
         </p>
         <Link href={isAuthenticated ? '/dashboard' : '/register'}
           className="btn btn-primary btn-lg"
           style={{ borderRadius: 6, display: 'inline-flex' }}>
-          Get Started &nbsp;→
+            Explore Now &nbsp;→
         </Link>
       </section>
 
@@ -161,9 +140,9 @@ export default function Home() {
               <Link key={t} href={`/jobs?q=${encodeURIComponent(t)}`}
                 style={{
                   padding: '6px 14px', borderRadius: 20,
-                  background: 'var(--blue-light)', color: 'var(--blue)',
+                  background: 'var(--blue-light)', color: 'green',
                   fontSize: 13, fontWeight: 600,
-                  border: '1px solid var(--blue-border)',
+                  border: '1px solid var(--green-border)',
                   textDecoration: 'none',
                 }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--blue-border)'}
@@ -197,7 +176,7 @@ export default function Home() {
           <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: 12 }}>
             {['Post a Job', 'Hiring Solutions', 'Salary Benchmarks', 'Analytics Dashboard'].map(r => (
               <Link key={r} href="/analytics"
-                style={{ fontSize: 13, color: 'var(--blue)', fontWeight: 600, textDecoration: 'none' }}
+                style={{ fontSize: 13, color: 'green', fontWeight: 600, textDecoration: 'none' }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.textDecoration = 'underline'}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.textDecoration = 'none'}
               >
@@ -222,7 +201,7 @@ export default function Home() {
           { icon: TrendingUp, label: '98% Accuracy', sub: 'data verified' },
         ].map(({ icon: Icon, label, sub }) => (
           <div key={label} style={{ textAlign: 'center' }}>
-            <Icon size={22} style={{ color: 'var(--blue)', margin: '0 auto 6px' }} />
+            <Icon size={22} style={{ color: 'green', margin: '0 auto 6px' }} />
             <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--gray-900)' }}>{label}</p>
             <p style={{ fontSize: 12, color: 'var(--gray-400)' }}>{sub}</p>
           </div>

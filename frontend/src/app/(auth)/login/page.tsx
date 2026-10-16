@@ -41,10 +41,10 @@ export default function LoginPage() {
         <Link href="/" className="site-nav-brand">Smart Job Market</Link>
         <div className="flex-1" />
         <div className="flex items-center gap-4">
-          <span style={{ fontSize: 13, color: 'var(--gray-400)' }}>ZA &nbsp; En</span>
+          <span style={{ fontSize: 13, color: 'var(--gray-400)' }}> &nbsp; </span>
           <span style={{ color: 'var(--gray-200)' }}>|</span>
           <Link href="/register" style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-700)', textDecoration: 'none' }}>
-            Employers / Post Job
+
           </Link>
         </div>
       </nav>
