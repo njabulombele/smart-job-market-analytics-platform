@@ -46,7 +46,7 @@ export default function RegisterPage() {
         <Link href="/" className="site-nav-brand">Smart Job Market</Link>
         <div className="flex-1" />
         <Link href="/login"
-          style={{ fontSize: 14, fontWeight: 600, color: 'var(--gray-700)', textDecoration: 'none' }}>
+          style={{ fontSize: 14, fontWeight: 600, color: 'green', textDecoration: 'none' }}>
           Sign in
         </Link>
       </nav>
@@ -62,7 +62,7 @@ export default function RegisterPage() {
 
           {/* Brand */}
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <div style={{ fontSize: 32, fontWeight: 900, color: 'var(--blue)', letterSpacing: -1, marginBottom: 4 }}>
+            <div style={{ fontSize: 32, fontWeight: 900, color: 'green', letterSpacing: -1, marginBottom: 4 }}>
               Smart Job Market
             </div>
             <p style={{ fontSize: 15, color: 'var(--gray-400)' }}>
@@ -75,7 +75,7 @@ export default function RegisterPage() {
               Create your account
             </h1>
             <p style={{ fontSize: 13, color: 'var(--gray-400)', marginBottom: 20 }}>
-              Start exploring job market intelligence for free
+              Start exploring job market for free
             </p>
 
             <form onSubmit={handleSubmit(onSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -140,7 +140,7 @@ export default function RegisterPage() {
                 {isLoading ? (
                   <>
                     <span style={{ width:16, height:16, borderRadius:'50%',
-                                   border:'2px solid rgba(255,255,255,.3)', borderTopColor:'#fff',
+                                   border:'2px solid rgba(255,255,255,.3)', borderTopColor:'green',
                                    animation:'spin .65s linear infinite', display:'inline-block' }} />
                     Creating account…
                   </>
@@ -161,7 +161,7 @@ export default function RegisterPage() {
 
             <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--gray-600)' }}>
               Already have an account?{' '}
-              <Link href="/login" style={{ color: 'var(--blue)', fontWeight: 700 }}>
+              <Link href="/login" style={{ color: 'green', fontWeight: 700 }}>
                 Sign in
               </Link>
             </p>
