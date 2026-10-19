@@ -8,7 +8,7 @@ export function cn(...inputs: ClassValue[]) {
 export function formatSalary(min?: number, max?: number): string | null {
   if (!min && !max) return null;
   const fmt = (n: number) =>
-    n >= 1000 ? `$${(n / 1000).toFixed(0)}k` : `$${n}`;
+    n >= 1000 ? `R${(n / 1000).toFixed(0)}k` : `R${n}`;
   if (min && max) return `${fmt(min)} – ${fmt(max)}`;
   return min ? `From ${fmt(min)}` : `Up to ${fmt(max!)}`;
 }

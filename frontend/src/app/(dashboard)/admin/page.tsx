@@ -3,200 +3,199 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { Users, Activity, PlayCircle, ShieldCheck, UserCog, Cpu, Zap } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
-interface AdminUser { id: number; email: string; fullName: string; role: string; isActive: boolean; createdAt: string; }
-interface Stats      { totalJobs: number; activeJobs: number; totalUsers: number; }
-interface Pipeline   { status: string; lastRun: string; nextRun: string; jobsCollected: number; }
-type Tab = 'stats' | 'users' | 'pipeline';
+interface AdminUser { id:number; email:string; fullName:string; role:string; isActive:boolean; createdAt:string; }
+interface Stats      { totalJobs:number; activeJobs:number; totalUsers:number; }
+interface Pipeline   { status:string; lastRun:string; nextRun:string; jobsCollected:number; }
+type Tab = 'stats'|'users'|'pipeline';
 
-const ROLE_COLORS: Record<string, string> = {
-  ADMIN:   'bg-rose-100 text-rose-700 border-rose-200',
-  ANALYST: 'bg-violet-100 text-violet-700 border-violet-200',
-  USER:    'bg-blue-100 text-blue-700 border-blue-200',
+const ROLE_BADGE: Record<string,string> = {
+  ADMIN:'badge badge-red', ANALYST:'badge badge-purple', USER:'badge badge-blue',
 };
+
+const TABS: { key:Tab; icon:any; label:string }[] = [
+  { key:'stats',    icon:Activity, label:'Statistics'  },
+  { key:'users',    icon:Users,    label:'Users'        },
+  { key:'pipeline', icon:Cpu,      label:'Pipeline'     },
+];
 
 export default function AdminPage() {
   const [users,    setUsers]    = useState<AdminUser[]>([]);
-  const [stats,    setStats]    = useState<Stats | null>(null);
-  const [pipeline, setPipeline] = useState<Pipeline | null>(null);
+  const [stats,    setStats]    = useState<Stats|null>(null);
+  const [pipeline, setPipeline] = useState<Pipeline|null>(null);
   const [loading,  setLoading]  = useState(true);
   const [tab,      setTab]      = useState<Tab>('stats');
 
   useEffect(() => {
-    Promise.all([
-      api.get('/admin/users'),
-      api.get('/admin/stats'),
-      api.get('/admin/pipeline/status'),
-    ]).then(([u, s, p]) => {
-      setUsers(u.data.content ?? u.data ?? []);
-      setStats(s.data);
-      setPipeline(p.data);
-    }).catch(() => {}).finally(() => setLoading(false));
+    Promise.all([api.get('/admin/users'), api.get('/admin/stats'), api.get('/admin/pipeline/status')])
+      .then(([u,s,p]) => {
+        setUsers(u.data.content ?? u.data ?? []);
+        setStats(s.data);
+        setPipeline(p.data);
+      })
+      .catch(() => {}).finally(() => setLoading(false));
   }, []);
 
-  const triggerPipeline = async () => { await api.post('/admin/pipeline/trigger'); };
-  const updateRole = async (id: number, role: string) => {
+  const updateRole = async (id:number, role:string) => {
     await api.put(`/admin/users/${id}/role`, { role });
-    setUsers(prev => prev.map(u => u.id === id ? { ...u, role } : u));
+    setUsers(p => p.map(u => u.id===id ? { ...u, role } : u));
   };
 
-  const TABS = [
-    { key: 'stats'    as Tab, icon: Activity, label: 'Stats',    active: 'from-blue-500 to-indigo-500'    },
-    { key: 'users'    as Tab, icon: Users,    label: 'Users',    active: 'from-violet-500 to-purple-500'  },
-    { key: 'pipeline' as Tab, icon: Cpu,      label: 'Pipeline', active: 'from-emerald-500 to-teal-500'   },
-  ];
-
-  if (loading) return <div className="flex justify-center py-16"><div className="spinner" /></div>;
+  if (loading) return <div className="flex justify-center py-20"><div className="spinner" /></div>;
 
   return (
-    <div className="space-y-5 max-w-5xl">
+    <div className="space-y-4">
 
-      {/* ── Hero ── */}
-      <div className="hero-rose rounded-2xl px-6 py-5 border border-rose-200 shadow-sm">
+      {/* Hero */}
+      <div className="page-hero">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-red-600
-                          flex items-center justify-center shadow-md shadow-rose-500/30">
-            <ShieldCheck size={18} className="text-white" />
+          <div style={{ width:40, height:40, borderRadius:8, background:'#DC2626',
+                        display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <ShieldCheck size={18} color="#fff" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight
-                           bg-gradient-to-r from-rose-600 to-red-500 bg-clip-text text-transparent">
-              Admin Panel
-            </h1>
-            <p className="text-slate-500 text-sm mt-0.5">Manage users, monitor platform health, run pipelines</p>
+            <h1 className="page-hero-title">Admin Panel</h1>
+            <p className="page-hero-sub">Manage users, monitor platform health, and run data pipelines</p>
           </div>
         </div>
       </div>
 
-      {/* ── Tabs ── */}
-      <div className="flex gap-2">
-        {TABS.map(({ key, icon: Icon, label, active }) => (
+      {/* Tabs */}
+      <div style={{ display:'flex', gap:4, borderBottom:'1px solid #E5E7EB', paddingBottom:0 }}>
+        {TABS.map(({ key, icon:Icon, label }) => (
           <button key={key} onClick={() => setTab(key)}
-            className={cn(
-              'flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-150',
-              tab === key
-                ? `bg-gradient-to-r ${active} text-white shadow-md`
-                : 'bg-white text-slate-500 border border-indigo-100 hover:border-indigo-300 hover:text-indigo-600'
-            )}>
-            <Icon size={14} />{label}
+            style={{
+              display:'flex', alignItems:'center', gap:6,
+              padding:'10px 16px', fontSize:14, fontWeight:600,
+              color: tab===key ? '#2557A7' : '#6B7280',
+              background:'transparent', border:'none',
+              borderBottom: tab===key ? '2px solid #2557A7' : '2px solid transparent',
+              cursor:'pointer', transition:'color .12s',
+            }}>
+            <Icon size={15} />{label}
           </button>
         ))}
       </div>
 
-      {/* ── Stats ── */}
+      {/* Stats */}
       {tab === 'stats' && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {stats ? [
-            { label: 'Total Jobs',  value: stats.totalJobs,  icon: Activity, from: 'from-blue-500',    to: 'to-indigo-600',  shadow: 'shadow-blue-500/30',    ring: 'ring-blue-100'   },
-            { label: 'Active Jobs', value: stats.activeJobs, icon: Activity, from: 'from-emerald-500', to: 'to-teal-600',    shadow: 'shadow-emerald-500/30', ring: 'ring-emerald-100'},
-            { label: 'Total Users', value: stats.totalUsers, icon: UserCog,  from: 'from-violet-500',  to: 'to-purple-600',  shadow: 'shadow-violet-500/30',  ring: 'ring-violet-100' },
-          ].map(({ label, value, icon: Icon, from, to, shadow, ring }) => (
-            <div key={label} className={`stat-card ring-1 ${ring}`}>
-              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${from} ${to}
-                              flex items-center justify-center shadow-lg ${shadow}`}>
-                <Icon size={20} className="text-white" />
+            { label:'Total Jobs',  value:stats.totalJobs,  icon:Activity, bg:'#EFF6FF', color:'#1D4ED8' },
+            { label:'Active Jobs', value:stats.activeJobs, icon:Activity, bg:'#F0FDF4', color:'#15803D' },
+            { label:'Total Users', value:stats.totalUsers, icon:UserCog,  bg:'#F5F3FF', color:'#6D28D9' },
+          ].map(({ label, value, icon:Icon, bg, color }) => (
+            <div key={label} className="stat-card">
+              <div className="stat-icon" style={{ background:bg }}>
+                <Icon size={20} style={{ color }} />
               </div>
               <div>
-                <p className="text-xs text-slate-500 font-semibold uppercase tracking-wide">{label}</p>
-                <p className="text-2xl font-extrabold text-slate-900">{Number(value ?? 0).toLocaleString()}</p>
+                <p style={{ fontSize:12, color:'#6B7280', fontWeight:500 }}>{label}</p>
+                <p style={{ fontSize:24, fontWeight:700, color:'#111827', marginTop:2, lineHeight:1 }}>
+                  {Number(value ?? 0).toLocaleString()}
+                </p>
               </div>
             </div>
           )) : (
-            <div className="col-span-3 card text-center text-slate-400 py-12">
-              No stats available. Backend may not be connected.
+            <div className="card col-span-3" style={{ padding:40, textAlign:'center', color:'#9CA3AF' }}>
+              No stats available — backend may not be connected.
             </div>
           )}
         </div>
       )}
 
-      {/* ── Users ── */}
+      {/* Users */}
       {tab === 'users' && (
-        <div className="card card-accent-violet !p-0 overflow-hidden">
+        <div className="card" style={{ overflow:'hidden' }}>
           {users.length > 0 ? (
-            <table className="data-table">
+            <table className="table">
               <thead>
                 <tr>
-                  <th>User</th><th>Role</th><th>Status</th><th>Joined</th>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Member since</th>
                 </tr>
               </thead>
               <tbody>
-                {users.map(user => (
-                  <tr key={user.id}>
+                {users.map(u => (
+                  <tr key={u.id}>
                     <td>
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-500
-                                        flex items-center justify-center text-white text-xs font-extrabold shadow-sm">
-                          {user.email.slice(0, 2).toUpperCase()}
+                      <div style={{ display:'flex', alignItems:'center', gap:12 }}>
+                        <div style={{
+                          width:36, height:36, borderRadius:'50%', background:'#2557A7',
+                          color:'#fff', fontSize:13, fontWeight:700,
+                          display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
+                        }}>
+                          {u.email.slice(0,2).toUpperCase()}
                         </div>
                         <div>
-                          <p className="font-bold text-slate-800">{user.fullName || '—'}</p>
-                          <p className="text-xs text-slate-400">{user.email}</p>
+                          <p style={{ fontSize:14, fontWeight:600, color:'#111827', lineHeight:1.2 }}>
+                            {u.fullName || '—'}
+                          </p>
+                          <p style={{ fontSize:12, color:'#9CA3AF', marginTop:1 }}>{u.email}</p>
                         </div>
                       </div>
                     </td>
                     <td>
-                      <select value={user.role}
-                        onChange={e => updateRole(user.id, e.target.value)}
-                        className={cn(
-                          'text-xs border rounded-lg px-2.5 py-1.5 font-bold focus:outline-none focus:ring-2 focus:ring-indigo-400',
-                          ROLE_COLORS[user.role] ?? 'bg-slate-50 text-slate-600 border-slate-200'
-                        )}>
-                        <option>USER</option><option>ANALYST</option><option>ADMIN</option>
+                      <select value={u.role} onChange={e => updateRole(u.id, e.target.value)}
+                        className={ROLE_BADGE[u.role] ?? 'badge badge-gray'}
+                        style={{ appearance:'none', cursor:'pointer', border:'none', fontWeight:600, padding:'4px 10px' }}>
+                        <option>USER</option>
+                        <option>ANALYST</option>
+                        <option>ADMIN</option>
                       </select>
                     </td>
                     <td>
-                      <span className={cn(
-                        'badge border font-bold',
-                        user.isActive
-                          ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                          : 'bg-red-100 text-red-700 border-red-200'
-                      )}>
-                        {user.isActive ? '● Active' : '○ Disabled'}
+                      <span className={u.isActive ? 'badge badge-green' : 'badge badge-red'}>
+                        {u.isActive ? '● Active' : '○ Inactive'}
                       </span>
                     </td>
-                    <td className="text-slate-400 text-xs font-medium">
-                      {new Date(user.createdAt).toLocaleDateString()}
+                    <td style={{ fontSize:13, color:'#9CA3AF' }}>
+                      {new Date(u.createdAt).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           ) : (
-            <div className="text-center text-slate-400 py-12 font-medium">No users found.</div>
+            <div className="empty-state"><p className="text-gray-400 text-sm">No users found.</p></div>
           )}
         </div>
       )}
 
-      {/* ── Pipeline ── */}
+      {/* Pipeline */}
       {tab === 'pipeline' && (
-        <div className="card card-accent-emerald space-y-5">
-          <div className="section-banner hero-emerald rounded-t-2xl -mx-6 -mt-6 mb-5 px-6 py-3
-                          flex items-center justify-between">
-            <h2 className="section-title !mb-0 !text-emerald-700">Data Pipeline Status</h2>
-            <button onClick={triggerPipeline}
-              className="btn-success flex items-center gap-2 py-2 px-4 text-xs">
+        <div className="card">
+          <div className="section-header">
+            <h2 className="section-title">Data Pipeline Status</h2>
+            <button onClick={() => api.post('/admin/pipeline/trigger')}
+              className="btn btn-success btn-sm">
               <PlayCircle size={14} /><Zap size={13} /> Trigger Now
             </button>
           </div>
-
-          {pipeline ? (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[
-                { label: 'Status',         value: pipeline.status,                                      bg: 'from-blue-50 to-indigo-50',    border: 'border-blue-200',    text: 'text-blue-700'   },
-                { label: 'Jobs Collected', value: pipeline.jobsCollected?.toLocaleString(),              bg: 'from-emerald-50 to-teal-50',   border: 'border-emerald-200', text: 'text-emerald-700'},
-                { label: 'Last Run',       value: pipeline.lastRun ? new Date(pipeline.lastRun).toLocaleString() : '—', bg: 'from-violet-50 to-purple-50',border: 'border-violet-200', text: 'text-violet-700' },
-                { label: 'Next Run',       value: pipeline.nextRun ? new Date(pipeline.nextRun).toLocaleString() : '—', bg: 'from-amber-50 to-orange-50', border: 'border-amber-200',  text: 'text-amber-700'  },
-              ].map(({ label, value, bg, border, text }) => (
-                <div key={label} className={`bg-gradient-to-br ${bg} border ${border} rounded-xl p-4`}>
-                  <p className="text-xs text-slate-500 font-bold uppercase tracking-wide mb-1">{label}</p>
-                  <p className={`text-sm font-extrabold ${text}`}>{value ?? '—'}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center text-slate-400 py-8 font-medium">Pipeline status unavailable.</div>
-          )}
+          <div style={{ padding:20 }}>
+            {pipeline ? (
+              <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:12 }}
+                   className="sm:grid-cols-4">
+                {[
+                  { lbl:'Status',         val:pipeline.status,                           color:'#1D4ED8' },
+                  { lbl:'Jobs Collected', val:pipeline.jobsCollected?.toLocaleString(),   color:'#15803D' },
+                  { lbl:'Last Run',       val:pipeline.lastRun ? new Date(pipeline.lastRun).toLocaleString():'—', color:'#6D28D9' },
+                  { lbl:'Next Run',       val:pipeline.nextRun ? new Date(pipeline.nextRun).toLocaleString():'—', color:'#B45309' },
+                ].map(({ lbl, val, color }) => (
+                  <div key={lbl} style={{ padding:14, borderRadius:6, background:'#F9FAFB', border:'1px solid #E5E7EB' }}>
+                    <p style={{ fontSize:11, color:'#9CA3AF', fontWeight:600, textTransform:'uppercase', letterSpacing:'.05em', marginBottom:4 }}>
+                      {lbl}
+                    </p>
+                    <p style={{ fontSize:14, fontWeight:700, color }}>{val ?? '—'}</p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-400 text-sm text-center py-8">Pipeline status unavailable.</p>
+            )}
+          </div>
         </div>
       )}
     </div>

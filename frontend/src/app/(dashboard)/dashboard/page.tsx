@@ -3,218 +3,204 @@
 import { useEffect, useState } from 'react';
 import {
   BarChart, Bar, Cell, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, AreaChart, Area, CartesianGrid
+  ResponsiveContainer, AreaChart, Area, CartesianGrid,
 } from 'recharts';
 import { analyticsApi } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
-import { Briefcase, TrendingUp, MapPin, DollarSign, ArrowUpRight, Zap, Sparkles } from 'lucide-react';
+import { Briefcase, TrendingUp, MapPin, DollarSign, ArrowUpRight, Sparkles } from 'lucide-react';
 
-const STAT_DATA = [
-  { label: 'Total Jobs',      value: '124,830', change: '+2.4%', icon: Briefcase,  from: 'from-blue-500',    to: 'to-indigo-600',   shadow: 'shadow-blue-500/30',    ring: 'ring-blue-100',   text: 'text-blue-600'   },
-  { label: 'Active Listings', value: '18,204',  change: '+8.1%', icon: TrendingUp, from: 'from-emerald-500', to: 'to-teal-600',     shadow: 'shadow-emerald-500/30', ring: 'ring-emerald-100',text: 'text-emerald-600'},
-  { label: 'Cities Covered',  value: '284',     change: '+5',    icon: MapPin,     from: 'from-violet-500',  to: 'to-purple-600',   shadow: 'shadow-violet-500/30',  ring: 'ring-violet-100', text: 'text-violet-600' },
-  { label: 'Avg Salary',      value: '$132K',   change: '+$4K',  icon: DollarSign, from: 'from-amber-400',   to: 'to-orange-500',   shadow: 'shadow-amber-400/30',   ring: 'ring-amber-100',  text: 'text-amber-600'  },
+const STATS = [
+  { label: 'Total Jobs',      value: '124,830', delta: '+2.4%', icon: Briefcase,  bg: '#EBF2FF', color: '#2557A7' },
+  { label: 'Active Listings', value: '18,204',  delta: '+8.1%', icon: TrendingUp, bg: '#E6F5EC', color: '#0D7D44' },
+  { label: 'Cities Covered',  value: '284',     delta: '+5',    icon: MapPin,     bg: '#F0EDFB', color: '#5B35A5' },
+  { label: 'Average Salary',  value: 'R2.4M',   delta: '+R72K',  icon: DollarSign, bg: '#FFF3D6', color: '#7C4F00' },
 ];
 
-const BAR_COLORS = ['#6366f1','#3b82f6','#06b6d4','#8b5cf6','#ec4899','#10b981','#f59e0b','#ef4444'];
-const CITY_COLORS= ['bg-gradient-to-r from-blue-500 to-indigo-500',
-                    'bg-gradient-to-r from-violet-500 to-purple-500',
-                    'bg-gradient-to-r from-emerald-500 to-teal-500',
-                    'bg-gradient-to-r from-amber-400 to-orange-400',
-                    'bg-gradient-to-r from-rose-400 to-pink-400',
-                    'bg-gradient-to-r from-cyan-400 to-blue-400'];
+const COLORS = ['#2557A7','#5B35A5','#0D9488','#0D7D44','#7C4F00','#CC1016','#0891B2','#9333EA'];
 
 const Tip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-slate-900 text-white text-xs rounded-xl px-3 py-2 shadow-2xl border border-indigo-800/30">
-      <p className="text-indigo-300 mb-0.5 font-medium">{label}</p>
-      <p className="text-white font-bold">{Number(payload[0].value).toLocaleString()} jobs</p>
+    <div className="chart-tip">
+      <p style={{ color: 'var(--gray-400)', fontSize: 11, marginBottom: 2 }}>{label}</p>
+      <p style={{ fontWeight: 700, color: 'var(--gray-900)', fontSize: 13 }}>
+        {Number(payload[0].value).toLocaleString()}
+      </p>
     </div>
   );
 };
 
-function generateActivityData() {
-  const labels = ['Mon','','','Tue','','','Wed','','','Thu','','','Fri','','','Sat','','','Sun','','','Mon','','','Tue','','','Wed'];
-  const base = 450;
-  return labels.map((day, i) => ({
-    day,
-    jobCount: Math.round(base + Math.sin(i / 3) * 130 + Math.random() * 90),
+function activityData() {
+  return Array.from({ length: 28 }, (_, i) => ({
+    day: i % 7 === 0 ? ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'][i / 7 | 0] : '',
+    value: Math.round(420 + Math.sin(i / 3.5) * 100 + Math.random() * 80),
   }));
 }
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
-  const [topSkills,    setTopSkills]    = useState<Array<{ skill: string; jobCount: number }>>([]);
-  const [topLocations, setTopLocations] = useState<Array<{ city: string; jobCount: number }>>([]);
+  const [skills,  setSkills]  = useState<{ skill: string; jobCount: number }[]>([]);
+  const [cities,  setCities]  = useState<{ city: string; jobCount: number }[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([analyticsApi.topSkills(8), analyticsApi.topLocations(6)])
-      .then(([s, l]) => { setTopSkills(s.data ?? []); setTopLocations(l.data ?? []); })
+      .then(([s, l]) => { setSkills(s.data ?? []); setCities(l.data ?? []); })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const firstName = user?.email?.split('@')[0] ?? 'there';
+  const name = user?.email?.split('@')[0] ?? 'there';
 
   if (loading) return (
-    <div className="flex items-center justify-center h-64"><div className="spinner" /></div>
+    <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
+      <div className="spinner" />
+    </div>
   );
 
   return (
-    <div className="space-y-6 max-w-7xl">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-      {/* ── Hero banner ── */}
-      <div className="hero-blue rounded-2xl px-6 py-5 flex items-center justify-between
-                      border border-indigo-200 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-extrabold tracking-tight
-                         bg-gradient-to-r from-indigo-700 to-blue-500 bg-clip-text text-transparent">
-            Good day, {firstName} 👋
-          </h1>
-          <p className="text-slate-500 text-sm mt-1">Here&apos;s what&apos;s happening in the job market today.</p>
-        </div>
-        <div className="hidden sm:flex items-center gap-2
-                        bg-gradient-to-r from-emerald-500 to-teal-500
-                        text-white rounded-xl px-4 py-2 shadow-md shadow-emerald-500/25">
-          <Zap size={14} />
-          <span className="text-xs font-bold">Live data</span>
-        </div>
+      {/* Welcome */}
+      <div>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--gray-900)' }}>
+          Good day, {name} 👋
+        </h1>
+        <p style={{ fontSize: 14, color: 'var(--gray-400)', marginTop: 2 }}>
+          Here&apos;s what&apos;s happening in the job market today.
+        </p>
       </div>
 
-      {/* ── Stat cards ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {STAT_DATA.map(({ label, value, change, icon: Icon, from, to, shadow, ring, text }) => (
-          <div key={label} className={`stat-card ring-1 ${ring}`}>
-            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${from} ${to}
-                            flex items-center justify-center flex-shrink-0
-                            shadow-lg ${shadow}`}>
-              <Icon size={20} className="text-white" />
+      {/* Stat cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+        {STATS.map(({ label, value, delta, icon: Icon, bg, color }) => (
+          <div key={label} className="stat-card">
+            <div className="stat-icon" style={{ background: bg }}>
+              <Icon size={20} style={{ color }} />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs text-slate-500 font-semibold uppercase tracking-wide">{label}</p>
-              <p className="text-2xl font-extrabold text-slate-900 leading-tight">{value}</p>
-              <div className={`flex items-center gap-0.5 mt-0.5 text-xs font-bold ${text}`}>
-                <ArrowUpRight size={12} /><span>{change} this month</span>
+            <div>
+              <p style={{ fontSize: 12, color: 'var(--gray-400)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.04em' }}>
+                {label}
+              </p>
+              <p style={{ fontSize: 22, fontWeight: 800, color: 'var(--gray-900)', lineHeight: 1.2, marginTop: 2 }}>
+                {value}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 3 }}>
+                <ArrowUpRight size={11} style={{ color }} />
+                <span style={{ fontSize: 12, fontWeight: 600, color }}>{delta} this month</span>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* ── Charts ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
-
-        {/* Skills bar chart */}
-        <div className="card card-accent-indigo xl:col-span-3">
-          <div className="section-banner hero-blue rounded-t-2xl -mx-6 -mt-6 mb-5 px-6 py-3 flex items-center justify-between">
-            <h2 className="section-title !mb-0 !text-indigo-700">Top Skills in Demand</h2>
-            <span className="text-xs text-indigo-500 font-semibold bg-indigo-100 rounded-full px-2.5 py-0.5">
-              by job count
-            </span>
+      {/* Charts row */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+        {/* Top skills */}
+        <div className="card" style={{ gridColumn: window?.innerWidth < 900 ? '1 / -1' : undefined }}>
+          <div className="section-header">
+            <h2 className="section-title">Top Skills in Demand</h2>
+            <span className="badge badge-blue">by job count</span>
           </div>
-          {topSkills.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={topSkills} layout="vertical" margin={{ top: 0, right: 16, bottom: 0, left: 70 }}>
-                <defs>
-                  {topSkills.map((_, i) => (
-                    <linearGradient key={i} id={`bg${i}`} x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%"   stopColor={BAR_COLORS[i % BAR_COLORS.length]} stopOpacity={0.9} />
-                      <stop offset="100%" stopColor={BAR_COLORS[(i + 1) % BAR_COLORS.length]} stopOpacity={0.7} />
-                    </linearGradient>
-                  ))}
-                </defs>
-                <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="skill" tick={{ fontSize: 12, fill: '#475569', fontWeight: 600 }}
-                       axisLine={false} tickLine={false} width={70} />
-                <Tooltip content={<Tip />} />
-                <Bar dataKey="jobCount" radius={[0, 8, 8, 0]}>
-                  {topSkills.map((_, i) => (
-                    <Cell key={i} fill={`url(#bg${i})`} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-48">
-              <div className="empty-icon"><Sparkles size={24} className="text-indigo-400" /></div>
-              <p className="text-slate-400 text-sm">No skill data yet.</p>
-            </div>
-          )}
+          <div style={{ padding: '16px 20px' }}>
+            {skills.length > 0 ? (
+              <ResponsiveContainer width="100%" height={230}>
+                <BarChart data={skills} layout="vertical"
+                          margin={{ top: 0, right: 8, bottom: 0, left: 74 }}>
+                  <XAxis type="number" tick={{ fontSize: 11, fill: 'var(--gray-300)' }}
+                         axisLine={false} tickLine={false} />
+                  <YAxis type="category" dataKey="skill"
+                         tick={{ fontSize: 12, fill: 'var(--gray-700)', fontWeight: 500 }}
+                         axisLine={false} tickLine={false} width={74} />
+                  <Tooltip content={<Tip />} />
+                  <Bar dataKey="jobCount" radius={[0, 4, 4, 0]} maxBarSize={14}>
+                    {skills.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="empty-state">
+                <div className="empty-icon"><Sparkles size={22} style={{ color: 'var(--gray-300)' }} /></div>
+                <p style={{ fontSize: 14, color: 'var(--gray-400)' }}>No skill data yet</p>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Top cities */}
-        <div className="card card-accent-emerald xl:col-span-2">
-          <div className="section-banner hero-emerald rounded-t-2xl -mx-6 -mt-6 mb-5 px-6 py-3">
-            <h2 className="section-title !mb-0 !text-emerald-700">Top Hiring Cities</h2>
+        <div className="card">
+          <div className="section-header">
+            <h2 className="section-title">Top Hiring Cities</h2>
           </div>
-          {topLocations.length > 0 ? (
-            <div className="space-y-3.5">
-              {topLocations.map((loc, i) => {
-                const max = topLocations[0]?.jobCount || 1;
-                const pct = Math.round((loc.jobCount / max) * 100);
-                return (
-                  <div key={loc.city}>
-                    <div className="flex justify-between items-center mb-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-extrabold text-slate-300 w-4">{i + 1}</span>
-                        <span className="text-sm font-semibold text-slate-700">{loc.city}</span>
+          <div style={{ padding: '16px 20px' }}>
+            {cities.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                {cities.map((c, i) => {
+                  const max = cities[0]?.jobCount || 1;
+                  const pct = Math.round((c.jobCount / max) * 100);
+                  const col = COLORS[i % COLORS.length];
+                  return (
+                    <div key={c.city}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--gray-700)' }}>{c.city}</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: col }}>
+                          {c.jobCount?.toLocaleString()}
+                        </span>
                       </div>
-                      <span className="text-xs font-bold text-emerald-600 bg-emerald-50 rounded-full px-2 py-0.5">
-                        {loc.jobCount?.toLocaleString()}
-                      </span>
+                      <div className="progress">
+                        <div className="progress-fill" style={{ width: `${pct}%`, background: col }} />
+                      </div>
                     </div>
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                      <div className={`h-full ${CITY_COLORS[i]} rounded-full transition-all duration-700`}
-                           style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-48">
-              <div className="empty-icon"><MapPin size={24} className="text-emerald-400" /></div>
-              <p className="text-slate-400 text-sm">No location data yet.</p>
-            </div>
-          )}
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <div className="empty-icon"><MapPin size={22} style={{ color: 'var(--gray-300)' }} /></div>
+                <p style={{ fontSize: 14, color: 'var(--gray-400)' }}>No location data yet</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* ── Area chart ── */}
-      <div className="card card-accent-violet">
-        <div className="section-banner hero-violet rounded-t-2xl -mx-6 -mt-6 mb-5 px-6 py-3 flex items-center justify-between">
-          <h2 className="section-title !mb-0 !text-violet-700">Market Activity (30 days)</h2>
-          <div className="flex gap-1">
-            {['1W','1M','3M'].map(t => (
-              <button key={t}
-                className={`text-xs px-2.5 py-1 rounded-lg font-bold transition
-                  ${t === '1M'
-                    ? 'bg-gradient-to-r from-violet-500 to-purple-500 text-white shadow-sm'
-                    : 'text-violet-500 hover:bg-violet-100'}`}>
+      {/* Activity chart */}
+      <div className="card">
+        <div className="section-header">
+          <h2 className="section-title">Market Activity — 30 days</h2>
+          <div style={{ display: 'flex', gap: 4 }}>
+            {['1W', '1M', '3M'].map(t => (
+              <button key={t} style={{
+                padding: '4px 10px', fontSize: 12, fontWeight: 700, borderRadius: 4,
+                background: t === '1M' ? 'var(--blue)' : 'transparent',
+                color: t === '1M' ? '#fff' : 'var(--gray-400)',
+                border: t === '1M' ? 'none' : '1px solid var(--gray-200)',
+                cursor: 'pointer',
+              }}>
                 {t}
               </button>
             ))}
           </div>
         </div>
-        <ResponsiveContainer width="100%" height={150}>
-          <AreaChart data={generateActivityData()} margin={{ top: 5, right: 10, bottom: 0, left: -20 }}>
-            <defs>
-              <linearGradient id="areaViolet" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stopColor="#8b5cf6" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f3f4f6" />
-            <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-            <Tooltip content={<Tip />} />
-            <Area type="monotone" dataKey="jobCount" stroke="#8b5cf6" strokeWidth={2.5}
-                  fill="url(#areaViolet)" dot={false}
-                  activeDot={{ r: 5, fill: '#8b5cf6', stroke: 'white', strokeWidth: 2 }} />
-          </AreaChart>
-        </ResponsiveContainer>
+        <div style={{ padding: '8px 20px 16px' }}>
+          <ResponsiveContainer width="100%" height={130}>
+            <AreaChart data={activityData()} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
+              <defs>
+                <linearGradient id="aG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%"   stopColor="#2557A7" stopOpacity={0.12} />
+                  <stop offset="100%" stopColor="#2557A7" stopOpacity={0}    />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="day" tick={{ fontSize: 10, fill: 'var(--gray-300)' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: 'var(--gray-300)' }} axisLine={false} tickLine={false} />
+              <Tooltip content={<Tip />} />
+              <Area type="monotone" dataKey="value" stroke="#2557A7" strokeWidth={2}
+                    fill="url(#aG)" dot={false}
+                    activeDot={{ r: 4, fill: '#2557A7', stroke: '#fff', strokeWidth: 2 }} />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
     </div>
   );

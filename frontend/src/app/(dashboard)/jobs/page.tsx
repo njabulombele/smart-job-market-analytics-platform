@@ -13,141 +13,142 @@ interface Job {
   skills: string[]; postedAt: string;
 }
 
-const REMOTE_OPTIONS = ['REMOTE', 'HYBRID', 'ON_SITE'];
-const EXP_OPTIONS    = ['JUNIOR', 'MID', 'SENIOR', 'LEAD'];
-const TYPE_OPTIONS   = ['FULL_TIME', 'PART_TIME', 'CONTRACT', 'FREELANCE'];
+const REMOTE_OPTS = ['REMOTE','HYBRID','ON_SITE'];
+const EXP_OPTS    = ['JUNIOR','MID','SENIOR','LEAD'];
+const TYPE_OPTS   = ['FULL_TIME','PART_TIME','CONTRACT','FREELANCE'];
 
-const REMOTE_STYLE: Record<string, string> = {
-  REMOTE:  'bg-emerald-100 text-emerald-700 border border-emerald-200',
-  HYBRID:  'bg-amber-100  text-amber-700  border border-amber-200',
-  ON_SITE: 'bg-slate-100  text-slate-600  border border-slate-200',
-};
-
-const EXP_STYLE: Record<string, string> = {
-  JUNIOR: 'bg-sky-100    text-sky-700',
-  MID:    'bg-violet-100 text-violet-700',
-  SENIOR: 'bg-indigo-100 text-indigo-700',
-  LEAD:   'bg-rose-100   text-rose-700',
-};
-
-/* distinct gradient per company-initial bucket */
-const AVATAR_GRAD = [
-  'from-blue-500 to-indigo-500',
-  'from-violet-500 to-purple-500',
-  'from-emerald-500 to-teal-500',
-  'from-amber-400 to-orange-500',
-  'from-rose-400 to-pink-500',
-  'from-cyan-400 to-blue-500',
-];
+const AVATAR_COLORS = ['#2557A7','#5B35A5','#0D9488','#0D7D44','#7C4F00','#CC1016'];
 
 export default function JobsPage() {
-  const [jobs,   setJobs]   = useState<Job[]>([]);
-  const [total,  setTotal]  = useState(0);
-  const [page,   setPage]   = useState(0);
+  const [jobs,    setJobs]    = useState<Job[]>([]);
+  const [total,   setTotal]   = useState(0);
+  const [page,    setPage]    = useState(0);
   const [loading, setLoading] = useState(false);
-  const [query,  setQuery]  = useState('');
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
-    skill: '', city: '', remoteType: '', experienceLevel: '', jobType: '',
-  });
+  const [query,   setQuery]   = useState('');
+  const [city,    setCity]    = useState('');
+  const [showF,   setShowF]   = useState(false);
+  const [filters, setFilters] = useState({ skill:'', city:'', remoteType:'', experienceLevel:'', jobType:'' });
+  const activeF = Object.values(filters).filter(Boolean).length;
 
-  const activeCount = Object.values(filters).filter(Boolean).length;
-
-  const fetchJobs = useCallback(async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = query
+      const r = query
         ? await jobsApi.search(query, page)
-        : await jobsApi.list({ ...filters, page, size: 20 });
-      setJobs(res.data.content ?? res.data ?? []);
-      setTotal(res.data.totalElements ?? res.data?.length ?? 0);
-    } catch { /* graceful */ }
-    finally { setLoading(false); }
-  }, [query, filters, page]);
+        : await jobsApi.list({ ...filters, city: city || filters.city, page, size: 20 });
+      setJobs(r.data.content ?? r.data ?? []);
+      setTotal(r.data.totalElements ?? r.data?.length ?? 0);
+    } catch { } finally { setLoading(false); }
+  }, [query, city, filters, page]);
 
-  useEffect(() => { fetchJobs(); }, [fetchJobs]);
+  useEffect(() => { load(); }, [load]);
 
   return (
-    <div className="space-y-5 max-w-5xl">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
 
-      {/* ── Hero ── */}
-      <div className="hero-violet rounded-2xl px-6 py-5 border border-violet-200 shadow-sm">
-        <h1 className="text-2xl font-extrabold tracking-tight
-                       bg-gradient-to-r from-violet-700 to-purple-500 bg-clip-text text-transparent">
-          Job Search
+      {/* ── Indeed-style search bar at top of jobs page ── */}
+      <div style={{
+        background: '#fff', borderBottom: '1px solid var(--border)',
+        padding: '16px 0 20px', marginBottom: 20,
+      }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--gray-900)', marginBottom: 12 }}>
+          Find jobs
         </h1>
-        <p className="text-slate-500 text-sm mt-0.5">
-          <span className="font-bold text-violet-600">{total.toLocaleString()}</span> positions available
-        </p>
+        <div className="search-bar" style={{ maxWidth: 760 }}>
+          {/* What */}
+          <div style={{ position: 'relative', flex: 1 }}>
+            <Search size={16} style={{
+              position: 'absolute', left: 14, top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'var(--gray-400)', pointerEvents: 'none',
+            }} />
+            <input
+              className="search-input"
+              placeholder="Job title, keywords, or company"
+              value={query}
+              onChange={e => { setQuery(e.target.value); setPage(0); }}
+              onKeyDown={e => e.key === 'Enter' && load()}
+            />
+          </div>
+          <div className="search-divider" />
+          {/* Where */}
+          <div style={{ position: 'relative', flex: 1 }}>
+            <MapPin size={16} style={{
+              position: 'absolute', left: 14, top: '50%',
+              transform: 'translateY(-50%)',
+              color: 'var(--gray-400)', pointerEvents: 'none',
+            }} />
+            <input
+              className="search-input"
+              placeholder='City, state, or "remote"'
+              value={city}
+              onChange={e => { setCity(e.target.value); setPage(0); }}
+              onKeyDown={e => e.key === 'Enter' && load()}
+            />
+          </div>
+          <button className="search-btn" onClick={load}>
+            Find jobs
+          </button>
+        </div>
       </div>
 
-      {/* ── Search bar ── */}
-      <div className="flex gap-3">
-        <div className="relative flex-1">
-          <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-indigo-400" />
-          <input
-            value={query}
-            onChange={e => { setQuery(e.target.value); setPage(0); }}
-            onKeyDown={e => e.key === 'Enter' && fetchJobs()}
-            placeholder="Search jobs, skills, companies…"
-            className="input pl-10"
-          />
-        </div>
-        <button onClick={fetchJobs}
-          className="btn-primary px-6 flex items-center gap-2">
-          <Search size={14} /> Search
-        </button>
-        <button onClick={() => setShowFilters(v => !v)}
-          className={cn(
-            'btn-secondary flex items-center gap-2 px-4 relative',
-            showFilters && 'ring-2 ring-indigo-400 ring-offset-1 bg-indigo-50'
-          )}>
-          <Filter size={14} />
-          <span className="hidden sm:inline">Filters</span>
-          {activeCount > 0 && (
-            <span className="w-5 h-5 bg-gradient-to-br from-indigo-500 to-violet-500 text-white
-                             text-[10px] font-bold rounded-full flex items-center justify-center
-                             absolute -top-2 -right-2 shadow-sm">
-              {activeCount}
+      {/* Results header + filter toggle */}
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        marginBottom: 12,
+      }}>
+        <p style={{ fontSize: 14, color: 'var(--gray-400)' }}>
+          <strong style={{ color: 'var(--gray-900)' }}>{total.toLocaleString()}</strong> jobs found
+        </p>
+        <button
+          onClick={() => setShowF(v => !v)}
+          className={cn('btn btn-sm', showF ? 'btn-outline' : 'btn-ghost')}
+          style={{ borderRadius: 20, position: 'relative' }}
+        >
+          <Filter size={13} /> Filters
+          {activeF > 0 && (
+            <span style={{
+              position: 'absolute', top: -6, right: -6,
+              width: 16, height: 16, borderRadius: '50%',
+              background: 'var(--blue)', color: '#fff',
+              fontSize: 10, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {activeF}
             </span>
           )}
         </button>
       </div>
 
-      {/* ── Filter panel ── */}
-      {showFilters && (
-        <div className="card card-accent-violet !py-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-bold text-violet-700 flex items-center gap-1.5">
-              <Filter size={13} /> Filter Jobs
-            </p>
-            {activeCount > 0 && (
+      {/* Filters */}
+      {showF && (
+        <div className="card" style={{ padding: 16, marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--gray-900)' }}>Filter results</p>
+            {activeF > 0 && (
               <button onClick={() => setFilters({ skill:'',city:'',remoteType:'',experienceLevel:'',jobType:'' })}
-                className="flex items-center gap-1 text-xs text-rose-500 hover:text-rose-700 font-bold">
-                <X size={11} /> Clear all
+                style={{ fontSize: 13, color: 'var(--red)', fontWeight: 600, background: 'none',
+                         border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <X size={12} /> Clear all
               </button>
             )}
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {[
-              { ph: 'Skill (e.g. Java)', key: 'skill' },
-              { ph: 'City',              key: 'city'  },
-            ].map(({ ph, key }) => (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
+            {[{ key:'skill', ph:'Skill, e.g. Java' }, { key:'city', ph:'City' }].map(({ key, ph }) => (
               <input key={key} placeholder={ph}
                 value={filters[key as keyof typeof filters]}
                 onChange={e => setFilters(f => ({ ...f, [key]: e.target.value }))}
-                className="input text-xs py-2" />
+                className="field" style={{ height: 38, fontSize: 13 }} />
             ))}
             {[
-              { key: 'remoteType',      opts: REMOTE_OPTIONS, label: 'Remote' },
-              { key: 'experienceLevel', opts: EXP_OPTIONS,    label: 'Level'  },
-              { key: 'jobType',         opts: TYPE_OPTIONS,   label: 'Type'   },
-            ].map(({ key, opts, label }) => (
-              <select key={key}
-                value={filters[key as keyof typeof filters]}
+              { key:'remoteType',      opts:REMOTE_OPTS, lbl:'Work type'        },
+              { key:'experienceLevel', opts:EXP_OPTS,    lbl:'Experience level' },
+              { key:'jobType',         opts:TYPE_OPTS,   lbl:'Employment type'  },
+            ].map(({ key, opts, lbl }) => (
+              <select key={key} value={filters[key as keyof typeof filters]}
                 onChange={e => setFilters(f => ({ ...f, [key]: e.target.value }))}
-                className="input text-xs py-2 bg-white">
-                <option value="">{label}</option>
+                className="field" style={{ height: 38, fontSize: 13, cursor: 'pointer' }}>
+                <option value="">{lbl}</option>
                 {opts.map(o => <option key={o} value={o}>{o.replace(/_/g,' ')}</option>)}
               </select>
             ))}
@@ -155,81 +156,106 @@ export default function JobsPage() {
         </div>
       )}
 
-      {/* ── Job list ── */}
+      {/* Job list */}
       {loading ? (
-        <div className="flex justify-center py-16"><div className="spinner" /></div>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
+          <div className="spinner" />
+        </div>
       ) : jobs.length === 0 ? (
-        <div className="card flex flex-col items-center justify-center py-20">
-          <div className="empty-icon"><Briefcase size={26} className="text-violet-400" /></div>
-          <p className="font-bold text-slate-600">No jobs found</p>
-          <p className="text-sm text-slate-400 mt-1">Try adjusting your search or filters</p>
+        <div className="card">
+          <div className="empty-state">
+            <div className="empty-icon"><Briefcase size={24} style={{ color: 'var(--gray-300)' }} /></div>
+            <p style={{ fontSize: 15, fontWeight: 700, color: 'var(--gray-700)' }}>No jobs found</p>
+            <p style={{ fontSize: 13, color: 'var(--gray-400)', marginTop: 4 }}>
+              Try different keywords or location
+            </p>
+          </div>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {jobs.map((job, idx) => {
-            const grad = AVATAR_GRAD[idx % AVATAR_GRAD.length];
+            const col = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+            const remoteLabel = job.remoteType?.replace(/_/g, ' ');
             return (
-              <Link key={job.id} href={`/jobs/${job.id}`}
-                className="block bg-white rounded-2xl border border-indigo-50
-                           px-5 py-4 shadow-sm
-                           hover:border-indigo-300 hover:shadow-md hover:shadow-indigo-100
-                           hover:-translate-y-0.5 transition-all duration-150 group">
-                <div className="flex justify-between items-start gap-4">
-                  <div className="flex gap-4 flex-1 min-w-0">
-                    <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${grad}
-                                    flex items-center justify-center flex-shrink-0
-                                    text-white font-extrabold text-sm shadow-md`}>
-                      {(job.companyName ?? 'J').charAt(0).toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-slate-800 group-hover:text-indigo-600 transition truncate">
-                        {job.title}
-                      </h3>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-slate-500">
-                        {job.companyName && (
-                          <span className="flex items-center gap-1 font-medium">
-                            <Building2 size={12} className="text-indigo-400" /> {job.companyName}
-                          </span>
-                        )}
-                        {job.city && (
-                          <span className="flex items-center gap-1">
-                            <MapPin size={12} className="text-violet-400" /> {job.city}
-                          </span>
-                        )}
-                        {formatSalary(job.salaryMin, job.salaryMax) && (
-                          <span className="flex items-center gap-1 font-bold text-emerald-600">
-                            <DollarSign size={12} /> {formatSalary(job.salaryMin, job.salaryMax)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap gap-1.5 mt-2.5">
-                        {job.skills?.slice(0, 5).map(s => (
-                          <span key={s} className="skill-pill">{s}</span>
-                        ))}
-                        {(job.skills?.length ?? 0) > 5 && (
-                          <span className="text-xs text-slate-400 self-center font-medium">
-                            +{job.skills.length - 5} more
-                          </span>
-                        )}
-                      </div>
-                    </div>
+              <Link key={job.id} href={`/jobs/${job.id}`} className="job-card">
+                <div style={{ display: 'flex', gap: 14 }}>
+                  {/* Company logo */}
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 6,
+                    background: col, color: '#fff',
+                    fontSize: 18, fontWeight: 800,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
+                  }}>
+                    {(job.companyName ?? 'J').charAt(0).toUpperCase()}
                   </div>
 
-                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                    {job.remoteType && (
-                      <span className={cn('badge', REMOTE_STYLE[job.remoteType] ?? 'bg-slate-100 text-slate-500')}>
-                        <Wifi size={10} /> {job.remoteType.replace('_',' ')}
-                      </span>
+                  {/* Details */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* Title */}
+                    <h3 className="job-card-title">{job.title}</h3>
+
+                    {/* Company + location */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center',
+                                  gap: '2px 12px', marginTop: 3 }}>
+                      {job.companyName && (
+                        <span className="job-card-company">{job.companyName}</span>
+                      )}
+                      {job.city && (
+                        <span className="job-card-meta" style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+                          <MapPin size={12} />
+                          {job.city}{job.country ? `, ${job.country}` : ''}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Salary */}
+                    {formatSalary(job.salaryMin, job.salaryMax) && (
+                      <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--green)', marginTop: 3 }}>
+                        {formatSalary(job.salaryMin, job.salaryMax)} p/a
+                      </p>
                     )}
-                    {job.experienceLevel && (
-                      <span className={cn('badge', EXP_STYLE[job.experienceLevel] ?? 'bg-slate-100 text-slate-500')}>
-                        {job.experienceLevel}
-                      </span>
-                    )}
-                    {job.postedAt && (
-                      <span className="text-xs text-slate-400 flex items-center gap-1">
-                        <Clock size={10} /> {timeAgo(job.postedAt)}
-                      </span>
+
+                    {/* Meta row: remote type, exp level, posted */}
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+                      {job.remoteType && (
+                        <span className={job.remoteType === 'REMOTE' ? 'badge badge-green' :
+                                          job.remoteType === 'HYBRID' ? 'badge badge-amber' :
+                                          'badge badge-gray'}>
+                          {remoteLabel}
+                        </span>
+                      )}
+                      {job.experienceLevel && (
+                        <span className={job.experienceLevel === 'JUNIOR' ? 'badge badge-blue' :
+                                          job.experienceLevel === 'LEAD'   ? 'badge badge-purple' :
+                                          'badge badge-gray'}>
+                          {job.experienceLevel}
+                        </span>
+                      )}
+                      {job.jobType && (
+                        <span className="badge badge-gray">{job.jobType.replace(/_/g,' ')}</span>
+                      )}
+                      {job.postedAt && (
+                        <span style={{ fontSize: 12, color: 'var(--gray-400)',
+                                       display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto' }}>
+                          <Clock size={11} />
+                          {timeAgo(job.postedAt)}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Skills */}
+                    {(job.skills?.length ?? 0) > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginTop: 8 }}>
+                        {job.skills.slice(0, 5).map(s => (
+                          <span key={s} className="skill-tag">{s}</span>
+                        ))}
+                        {job.skills.length > 5 && (
+                          <span style={{ fontSize: 12, color: 'var(--gray-400)', alignSelf: 'center' }}>
+                            +{job.skills.length - 5}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -239,16 +265,21 @@ export default function JobsPage() {
         </div>
       )}
 
-      {/* ── Pagination ── */}
+      {/* Pagination */}
       {total > 20 && (
-        <div className="flex items-center justify-center gap-3 pt-2">
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center',
+                      gap: 12, marginTop: 24 }}>
           <button disabled={page === 0} onClick={() => setPage(p => p - 1)}
-            className="btn-secondary py-2 px-5 disabled:opacity-40">← Previous</button>
-          <span className="text-sm font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-2">
-            {page + 1} / {Math.ceil(total / 20)}
+            className="btn btn-ghost btn-sm" style={{ borderRadius: 20 }}>
+            ← Previous
+          </button>
+          <span style={{ fontSize: 13, color: 'var(--gray-600)', fontWeight: 600 }}>
+            Page {page + 1} of {Math.ceil(total / 20)}
           </span>
           <button disabled={(page + 1) * 20 >= total} onClick={() => setPage(p => p + 1)}
-            className="btn-secondary py-2 px-5 disabled:opacity-40">Next →</button>
+            className="btn btn-ghost btn-sm" style={{ borderRadius: 20 }}>
+            Next →
+          </button>
         </div>
       )}
     </div>

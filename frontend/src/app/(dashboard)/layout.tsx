@@ -5,24 +5,24 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import {
-  BarChart3, Briefcase, Home, LogOut, MessageSquare,
+  BarChart3, Briefcase, Home, LogOut,
   TrendingUp, FileText, Users, ChevronLeft, ChevronRight,
-  Bell, Search, Settings, Sparkles
+  Bell, Search, Settings, Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-const navItems = [
-  { href: '/dashboard',  icon: Home,          label: 'Dashboard',    color: 'from-blue-400 to-indigo-500' },
-  { href: '/jobs',       icon: Briefcase,     label: 'Jobs',         color: 'from-violet-400 to-purple-500' },
-  { href: '/analytics',  icon: BarChart3,     label: 'Analytics',    color: 'from-cyan-400 to-blue-500' },
-  { href: '/trends',     icon: TrendingUp,    label: 'Trends',       color: 'from-emerald-400 to-teal-500' },
-  { href: '/resume',     icon: FileText,      label: 'Resume Match', color: 'from-amber-400 to-orange-500' },
-  { href: '/ai-coach',   icon: Sparkles,      label: 'AI Coach',     color: 'from-pink-400 to-rose-500' },
+const NAV = [
+  { href: '/dashboard', icon: Home,       label: 'Overview'     },
+  { href: '/jobs',      icon: Briefcase,  label: 'Jobs'         },
+  { href: '/analytics', icon: BarChart3,  label: 'Analytics'    },
+  { href: '/trends',    icon: TrendingUp, label: 'Trends'       },
+  { href: '/resume',    icon: FileText,   label: 'Resume Match' },
+  { href: '/ai-coach',  icon: Sparkles,   label: 'AI Coach'     },
 ];
 
-const adminItems = [
-  { href: '/admin',          icon: Users,    label: 'Admin',    color: 'from-rose-400 to-red-500' },
-  { href: '/admin/settings', icon: Settings, label: 'Settings', color: 'from-slate-400 to-slate-500' },
+const ADMIN_NAV = [
+  { href: '/admin',          icon: Users,    label: 'Admin'    },
+  { href: '/admin/settings', icon: Settings, label: 'Settings' },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -37,99 +37,89 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (!isAuthenticated) return null;
 
-  const initials = user?.email?.slice(0, 2).toUpperCase() ?? 'JM';
+  const initials     = (user?.email ?? 'JM').slice(0, 2).toUpperCase();
+  const displayName  = user?.email?.split('@')[0] ?? '';
 
   return (
-    <div className="flex h-screen bg-[#f0f4ff] overflow-hidden">
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', background: 'var(--gray-25)' }}>
 
       {/* ── Sidebar ── */}
-      <aside className={cn(
-        'sidebar-gradient flex flex-col transition-all duration-300 ease-in-out relative z-20 flex-shrink-0',
-        collapsed ? 'w-[68px]' : 'w-60'
-      )}>
-
-        {/* Logo */}
-        <div className={cn(
-          'flex items-center gap-3 px-4 py-5 border-b border-white/10',
-          'bg-gradient-to-r from-blue-600/20 to-indigo-600/20'
-        )}>
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600
-                          flex items-center justify-center flex-shrink-0
-                          shadow-lg shadow-indigo-600/40">
-            <BarChart3 size={17} className="text-white" />
+      <aside
+        className="sidebar"
+        style={{
+          width: collapsed ? 60 : 220,
+          transition: 'width .2s ease',
+          flexShrink: 0,
+          position: 'relative',
+          zIndex: 20,
+          overflowY: 'auto',
+          overflowX: 'hidden',
+        }}
+      >
+        {/* Brand */}
+        <div style={{
+          height: 56, display: 'flex', alignItems: 'center',
+          gap: 10, padding: '0 14px',
+          borderBottom: '1px solid var(--border)',
+          flexShrink: 0,
+        }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 6,
+            background: 'var(--blue)', display: 'flex',
+            alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+          }}>
+            <BarChart3 size={17} color="#fff" />
           </div>
           {!collapsed && (
-            <div className="overflow-hidden">
-              <p className="text-white font-extrabold text-sm leading-none tracking-tight truncate">
-                JobMarket AI
-              </p>
-              <p className="text-indigo-300 text-xs mt-0.5 truncate">{user?.email}</p>
-            </div>
+            <span style={{
+              fontSize: 14, fontWeight: 800, color: 'var(--blue)',
+              letterSpacing: -0.3, whiteSpace: 'nowrap', overflow: 'hidden',
+            }}>
+              Smart Job Market
+            </span>
           )}
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-2 py-4 space-y-0.5 overflow-y-auto overflow-x-hidden">
+        <nav style={{ flex: 1, padding: '12px 8px', display: 'flex', flexDirection: 'column', gap: 2 }}>
           {!collapsed && (
-            <p className="text-[10px] font-bold text-indigo-400/60 uppercase tracking-widest px-3 mb-2">
-              Navigation
+            <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                        letterSpacing: '.08em', color: 'var(--gray-300)',
+                        padding: '4px 6px 8px', }}>
+              Platform
             </p>
           )}
-
-          {navItems.map(({ href, icon: Icon, label, color }) => {
+          {NAV.map(({ href, icon: Icon, label }) => {
             const active = pathname === href ||
-                           (href !== '/dashboard' && pathname.startsWith(href));
+              (href !== '/dashboard' && pathname.startsWith(href));
             return (
               <Link key={href} href={href} title={collapsed ? label : undefined}
-                className={cn(
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium',
-                  'transition-all duration-150 group',
-                  active
-                    ? 'bg-gradient-to-r from-blue-500/90 to-indigo-500/90 text-white shadow-lg shadow-indigo-600/30'
-                    : 'text-slate-400 hover:bg-white/10 hover:text-white'
-                )}>
-                {active ? (
-                  <div className={cn(
-                    'w-6 h-6 rounded-lg bg-gradient-to-br flex items-center justify-center flex-shrink-0',
-                    color
-                  )}>
-                    <Icon size={13} className="text-white" />
-                  </div>
-                ) : (
-                  <Icon size={17} className="flex-shrink-0" />
-                )}
-                {!collapsed && <span className="truncate">{label}</span>}
+                className={cn('nav-link', active && 'active')}
+                style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
+                <Icon size={17} style={{ flexShrink: 0 }} />
+                {!collapsed && <span style={{ flex: 1, truncate: 'true' }}>{label}</span>}
+                {active && !collapsed && <span className="nav-dot" />}
               </Link>
             );
           })}
 
           {user?.role === 'ADMIN' && (
             <>
-              <div className="border-t border-white/10 my-3" />
+              <div style={{ height: 1, background: 'var(--gray-100)', margin: '8px 4px' }} />
               {!collapsed && (
-                <p className="text-[10px] font-bold text-rose-400/60 uppercase tracking-widest px-3 mb-2">
+                <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                             letterSpacing: '.08em', color: 'var(--gray-300)', padding: '4px 6px 8px' }}>
                   Admin
                 </p>
               )}
-              {adminItems.map(({ href, icon: Icon, label, color }) => {
+              {ADMIN_NAV.map(({ href, icon: Icon, label }) => {
                 const active = pathname.startsWith(href);
                 return (
                   <Link key={href} href={href} title={collapsed ? label : undefined}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium',
-                      'transition-all duration-150',
-                      active
-                        ? 'bg-gradient-to-r from-rose-500/90 to-pink-500/90 text-white shadow-lg shadow-rose-600/30'
-                        : 'text-slate-400 hover:bg-white/10 hover:text-white'
-                    )}>
-                    {active ? (
-                      <div className={cn('w-6 h-6 rounded-lg bg-gradient-to-br flex items-center justify-center flex-shrink-0', color)}>
-                        <Icon size={13} className="text-white" />
-                      </div>
-                    ) : (
-                      <Icon size={17} className="flex-shrink-0" />
-                    )}
-                    {!collapsed && <span className="truncate">{label}</span>}
+                    className={cn('nav-link', active && 'active')}
+                    style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}>
+                    <Icon size={17} style={{ flexShrink: 0 }} />
+                    {!collapsed && <span>{label}</span>}
                   </Link>
                 );
               })}
@@ -137,69 +127,137 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           )}
         </nav>
 
-        {/* Sign-out */}
-        <div className="px-2 py-3 border-t border-white/10">
-          <button onClick={() => { logout(); router.push('/login'); }}
+        {/* User + sign out */}
+        <div style={{ padding: '8px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+          {!collapsed && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '8px 10px', borderRadius: 6,
+              background: 'var(--gray-25)', marginBottom: 4,
+            }}>
+              <div style={{
+                width: 30, height: 30, borderRadius: '50%',
+                background: 'var(--blue)', color: '#fff',
+                fontSize: 11, fontWeight: 700,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                {initials}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--gray-900)',
+                             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {displayName}
+                </p>
+                <p style={{ fontSize: 11, color: 'var(--gray-400)', textTransform: 'capitalize' }}>
+                  {user?.role?.toLowerCase()}
+                </p>
+              </div>
+            </div>
+          )}
+          <button
+            onClick={() => { logout(); router.push('/login'); }}
             title={collapsed ? 'Sign out' : undefined}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium
-                       text-slate-400 hover:bg-rose-500/20 hover:text-rose-300
-                       transition-all duration-150">
-            <LogOut size={17} className="flex-shrink-0" />
+            className="nav-link"
+            style={{
+              width: '100%', color: 'var(--gray-400)',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+            }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.background = 'var(--red-bg)'; el.style.color = 'var(--red)'; }}
+            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.background = ''; el.style.color = 'var(--gray-400)'; }}
+          >
+            <LogOut size={16} style={{ flexShrink: 0 }} />
             {!collapsed && <span>Sign out</span>}
           </button>
         </div>
 
         {/* Collapse toggle */}
-        <button onClick={() => setCollapsed(v => !v)}
-          className="absolute -right-3.5 top-16 w-7 h-7 rounded-full
-                     bg-gradient-to-br from-blue-600 to-indigo-600
-                     border-2 border-[#f0f4ff]
-                     flex items-center justify-center text-white
-                     hover:scale-110 transition-all duration-150 shadow-md shadow-indigo-600/40">
+        <button
+          onClick={() => setCollapsed(v => !v)}
+          style={{
+            position: 'absolute', right: -12, top: 44,
+            width: 24, height: 24, borderRadius: '50%',
+            background: '#fff', border: '1px solid var(--border)',
+            boxShadow: '0 1px 4px rgba(0,0,0,.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', zIndex: 30, color: 'var(--blue)',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--blue)'; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--border)'; }}
+        >
           {collapsed ? <ChevronRight size={13} /> : <ChevronLeft size={13} />}
         </button>
       </aside>
 
       {/* ── Main ── */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
 
         {/* Topbar */}
-        <header className="h-14 bg-white/80 backdrop-blur-md
-                           border-b border-indigo-100
-                           flex items-center justify-between px-6 flex-shrink-0 z-10
-                           shadow-sm shadow-indigo-100/50">
-          <div className="flex items-center gap-3">
-            <div className="relative hidden sm:block">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-indigo-400" />
-              <input placeholder="Search jobs, skills…"
-                className="pl-9 pr-4 py-1.5 text-sm bg-indigo-50/60 border border-indigo-200
-                           rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400 w-56
-                           placeholder:text-indigo-300 text-slate-700 transition" />
-            </div>
+        <header className="topbar">
+          {/* Search */}
+          <div style={{ position: 'relative', display: 'none' }} className="sm:block"
+               id="topbar-search">
+            <Search size={14} style={{
+              position: 'absolute', left: 10, top: '50%',
+              transform: 'translateY(-50%)', color: 'var(--gray-300)', pointerEvents: 'none',
+            }} />
+            <input
+              placeholder="Search jobs, skills…"
+              style={{
+                height: 34, paddingLeft: 32, paddingRight: 12,
+                fontSize: 13, border: '1px solid var(--gray-200)',
+                borderRadius: 20, background: 'var(--gray-25)',
+                color: 'var(--gray-700)', outline: 'none', width: 220,
+                fontFamily: 'var(--font)',
+              }}
+              onFocus={e => { e.target.style.borderColor = 'var(--blue)'; e.target.style.background = '#fff'; }}
+              onBlur={e  => { e.target.style.borderColor = 'var(--gray-200)'; e.target.style.background = 'var(--gray-25)'; }}
+            />
           </div>
 
-          <div className="flex items-center gap-3">
-            <button className="relative w-8 h-8 rounded-xl
-                               bg-gradient-to-br from-indigo-50 to-blue-50
-                               border border-indigo-200
-                               flex items-center justify-center text-indigo-500
-                               hover:from-indigo-100 hover:to-blue-100 transition">
-              <Bell size={15} />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full
-                               ring-2 ring-white" />
+          {/* Spacer */}
+          <div style={{ flex: 1 }} />
+
+          {/* Right */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+
+            {/* Live pill */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '4px 10px', borderRadius: 20,
+              background: '#E6F5EC', border: '1px solid var(--green-border)',
+              fontSize: 12, fontWeight: 700, color: 'var(--green)',
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)' }} />
+              Live
+            </div>
+
+            {/* Bell */}
+            <button style={{
+              width: 36, height: 36, borderRadius: '50%', position: 'relative',
+              background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gray-400)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--gray-50)'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'none'}>
+              <Bell size={18} />
+              <span className="notif-dot" />
             </button>
 
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600
-                              flex items-center justify-center text-white text-xs font-extrabold
-                              shadow-md shadow-indigo-500/30">
+            {/* Avatar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: 'var(--blue)', color: '#fff',
+                fontSize: 12, fontWeight: 700,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
                 {initials}
               </div>
-              <div className="hidden sm:block">
-                <p className="text-sm font-semibold text-slate-700 leading-none">
-                  {user?.email?.split('@')[0]}
+              <div style={{ display: 'none' }} className="md:block">
+                <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--gray-900)', lineHeight: 1.2 }}>
+                  {displayName}
                 </p>
-                <p className="text-xs text-indigo-400 mt-0.5 font-medium capitalize">
+                <p style={{ fontSize: 11, color: 'var(--gray-400)', textTransform: 'capitalize' }}>
                   {user?.role?.toLowerCase()}
                 </p>
               </div>
@@ -208,8 +266,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
-          {children}
+        <main style={{ flex: 1, overflowY: 'auto' }}>
+          <div style={{ padding: '24px 28px', maxWidth: 1120, margin: '0 auto' }}
+               className="animate-in">
+            {children}
+          </div>
         </main>
       </div>
     </div>

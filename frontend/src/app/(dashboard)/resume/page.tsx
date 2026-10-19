@@ -3,176 +3,168 @@
 import { useState } from 'react';
 import { aiApi } from '@/lib/api';
 import { Upload, CheckCircle, XCircle, FileText, Zap } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
-interface MatchResult {
-  score: number; matchedSkills: string[];
-  missingSkills: string[]; explanation: string;
-}
+interface Result { score:number; matchedSkills:string[]; missingSkills:string[]; explanation:string; }
 
-export default function ResumeMatchPage() {
-  const [file,      setFile]      = useState<File | null>(null);
+export default function ResumePage() {
+  const [file,      setFile]      = useState<File|null>(null);
   const [jobId,     setJobId]     = useState('');
-  const [result,    setResult]    = useState<MatchResult | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [result,    setResult]    = useState<Result|null>(null);
+  const [loading,   setLoading]   = useState(false);
   const [error,     setError]     = useState('');
   const [dragging,  setDragging]  = useState(false);
 
-  const handleSubmit = async () => {
+  const run = async () => {
     if (!file || !jobId) return;
-    const fd = new FormData();
-    fd.append('resume', file); fd.append('jobId', jobId);
-    setIsLoading(true); setError('');
-    try {
-      const { data } = await aiApi.matchResume(fd);
-      setResult(data);
-    } catch { setError('Match failed. Please try again.'); }
-    finally { setIsLoading(false); }
+    const fd = new FormData(); fd.append('resume', file); fd.append('jobId', jobId);
+    setLoading(true); setError('');
+    try { const { data } = await aiApi.matchResume(fd); setResult(data); }
+    catch { setError('Analysis failed. Please try again.'); }
+    finally { setLoading(false); }
   };
 
-  const scoreTheme = (s: number) => {
-    if (s >= 0.8) return { ring: 'ring-emerald-400', text: 'text-emerald-600', bg: 'from-emerald-50 to-teal-50', bar: 'from-emerald-500 to-teal-400',   label: 'Excellent Match', border: 'border-emerald-200' };
-    if (s >= 0.5) return { ring: 'ring-amber-400',   text: 'text-amber-600',   bg: 'from-amber-50 to-orange-50', bar: 'from-amber-400 to-orange-400',   label: 'Good Match',      border: 'border-amber-200'   };
-    return               { ring: 'ring-rose-400',    text: 'text-rose-600',    bg: 'from-rose-50 to-pink-50',    bar: 'from-rose-400 to-pink-400',      label: 'Low Match',       border: 'border-rose-200'    };
+  const theme = (s: number) => {
+    if (s >= .8) return { color:'#15803D', label:'Excellent match',  bg:'#F0FDF4', border:'#BBF7D0' };
+    if (s >= .5) return { color:'#B45309', label:'Good match',       bg:'#FFFBEB', border:'#FDE68A' };
+    return             { color:'#B91C1C', label:'Low match',         bg:'#FEF2F2', border:'#FECACA' };
   };
 
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="max-w-2xl space-y-4">
 
-      {/* ── Hero ── */}
-      <div className="hero-amber rounded-2xl px-6 py-5 border border-amber-200 shadow-sm">
+      <div className="page-hero">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500
-                          flex items-center justify-center shadow-md shadow-amber-500/30">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center"
+               style={{ background: '#B45309' }}>
             <FileText size={18} className="text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight
-                           bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">
-              Resume Matcher
-            </h1>
-            <p className="text-slate-500 text-sm mt-0.5">Upload your CV and match it against any job posting</p>
+            <h1 className="page-hero-title">Resume Matcher</h1>
+            <p className="page-hero-sub">Upload your CV and match it against any job posting</p>
           </div>
         </div>
       </div>
 
-      {/* ── Upload card ── */}
-      <div className="card card-accent-amber space-y-5">
-        <div className="section-banner hero-amber rounded-t-2xl -mx-6 -mt-6 mb-5 px-6 py-3">
-          <p className="text-sm font-bold text-amber-700">Upload Your Resume</p>
+      <div className="card">
+        <div className="section-header">
+          <h2 className="section-title">Upload Resume</h2>
         </div>
+        <div style={{ padding:'20px' }}>
 
-        {/* Drop zone */}
-        <label
-          onDragOver={e => { e.preventDefault(); setDragging(true); }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) setFile(f); }}
-          className={cn(
-            'flex flex-col items-center justify-center border-2 border-dashed rounded-2xl p-10 cursor-pointer transition-all duration-150',
-            dragging ? 'border-indigo-400 bg-indigo-50 scale-[1.01]'
-              : file ? 'border-emerald-400 bg-gradient-to-br from-emerald-50 to-teal-50'
-              : 'border-amber-200 bg-amber-50/50 hover:border-amber-400 hover:bg-amber-50'
-          )}>
-          {file ? (
-            <>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500
-                              flex items-center justify-center mb-2 shadow-md shadow-emerald-500/30">
-                <FileText size={22} className="text-white" />
-              </div>
-              <p className="text-sm font-bold text-emerald-700">{file.name}</p>
-              <p className="text-xs text-emerald-500 mt-0.5 font-medium">{(file.size / 1024).toFixed(0)} KB — ready</p>
-            </>
-          ) : (
-            <>
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400
-                              flex items-center justify-center mb-2 shadow-md shadow-amber-400/30">
-                <Upload size={22} className="text-white" />
-              </div>
-              <p className="text-sm font-bold text-slate-600">Drop your resume here</p>
-              <p className="text-xs text-slate-400 mt-0.5">PDF, DOC or DOCX · click to browse</p>
-            </>
-          )}
-          <input type="file" accept=".pdf,.doc,.docx" className="hidden"
-            onChange={e => setFile(e.target.files?.[0] ?? null)} />
-        </label>
+          {/* Drop zone */}
+          <label
+            onDragOver={e => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={e => { e.preventDefault(); setDragging(false); const f=e.dataTransfer.files[0]; if(f) setFile(f); }}
+            style={{
+              display:'flex', flexDirection:'column', alignItems:'center',
+              justifyContent:'center', border:`2px dashed ${dragging?'#2557A7':file?'#15803D':'#D1D5DB'}`,
+              borderRadius:8, padding:'32px', cursor:'pointer',
+              background: dragging?'#EBF2FF':file?'#F0FDF4':'#F9FAFB',
+              transition:'all .15s',
+            }}>
+            {file ? (
+              <>
+                <FileText size={28} style={{ color:'#15803D', marginBottom:8 }} />
+                <p style={{ fontSize:14, fontWeight:600, color:'#15803D' }}>{file.name}</p>
+                <p style={{ fontSize:12, color:'#16A34A', marginTop:2 }}>
+                  {(file.size/1024).toFixed(0)} KB — ready to analyse
+                </p>
+              </>
+            ) : (
+              <>
+                <Upload size={28} style={{ color:'#9CA3AF', marginBottom:8 }} />
+                <p style={{ fontSize:14, fontWeight:600, color:'#374151' }}>
+                  Drag &amp; drop your resume here
+                </p>
+                <p style={{ fontSize:12, color:'#9CA3AF', marginTop:2 }}>
+                  PDF, DOC, or DOCX — or click to browse
+                </p>
+              </>
+            )}
+            <input type="file" accept=".pdf,.doc,.docx" className="hidden"
+              onChange={e => setFile(e.target.files?.[0] ?? null)} />
+          </label>
 
-        <div>
-          <label className="block text-sm font-bold text-slate-700 mb-2">Job ID</label>
-          <input type="number" value={jobId} onChange={e => setJobId(e.target.value)}
-            placeholder="Paste the Job ID from the Jobs page"
-            className="input" />
-        </div>
-
-        {error && (
-          <div className="bg-rose-50 border border-rose-200 rounded-xl px-4 py-3">
-            <p className="text-rose-600 text-sm font-medium">{error}</p>
+          {/* Job ID */}
+          <div style={{ marginTop:16 }}>
+            <label className="form-label">Job ID</label>
+            <input type="number" value={jobId} onChange={e => setJobId(e.target.value)}
+              placeholder="Enter the Job ID from the Jobs page" className="field" />
           </div>
-        )}
 
-        <button onClick={handleSubmit} disabled={!file || !jobId || isLoading}
-          className="btn-primary w-full py-3 flex items-center justify-center gap-2 text-base">
-          {isLoading ? (
-            <><span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />Analysing…</>
-          ) : (
-            <><Zap size={16} />Match Resume</>
+          {error && (
+            <div style={{ marginTop:12, padding:'10px 14px', borderRadius:6,
+                          background:'#FEF2F2', border:'1px solid #FECACA' }}>
+              <p style={{ fontSize:13, color:'#B91C1C' }}>{error}</p>
+            </div>
           )}
-        </button>
+
+          <button onClick={run} disabled={!file||!jobId||loading}
+            className="btn btn-primary"
+            style={{ marginTop:16, width:'100%', borderRadius:8 }}>
+            {loading
+              ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />Analysing…</>
+              : <><Zap size={15} />Analyse Match</>}
+          </button>
+        </div>
       </div>
 
-      {/* ── Results ── */}
+      {/* Results */}
       {result && (() => {
-        const c = scoreTheme(result.score);
+        const t   = theme(result.score);
         const pct = Math.round(result.score * 100);
         return (
-          <div className="card card-accent-emerald space-y-6">
-            <div className={`section-banner bg-gradient-to-br ${c.bg} border-b ${c.border} rounded-t-2xl -mx-6 -mt-6 mb-5 px-6 py-4`}>
-              <div className="flex items-center justify-between">
+          <div className="card">
+            <div className="section-header" style={{ background:t.bg, borderBottom:`1px solid ${t.border}` }}>
+              <div>
+                <h2 className="section-title" style={{ marginBottom:0 }}>Match Results</h2>
+                <p style={{ fontSize:14, fontWeight:600, color:t.color, marginTop:2 }}>{t.label}</p>
+              </div>
+              <div style={{ width:64, height:64, borderRadius:'50%', border:`3px solid ${t.color}`,
+                            display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+                            background:'#fff' }}>
+                <span style={{ fontSize:20, fontWeight:700, color:t.color, lineHeight:1 }}>{pct}%</span>
+              </div>
+            </div>
+            <div style={{ padding:20, display:'flex', flexDirection:'column', gap:16 }}>
+              {/* Bar */}
+              <div>
+                <div style={{ display:'flex', justifyContent:'space-between', fontSize:12, color:'#9CA3AF', marginBottom:6 }}>
+                  <span>Match score</span><span>{pct}%</span>
+                </div>
+                <div className="progress">
+                  <div className="progress-fill" style={{ width:`${pct}%`, background:t.color }} />
+                </div>
+              </div>
+              {/* Explanation */}
+              <p style={{ fontSize:14, color:'#374151', lineHeight:1.65, padding:14,
+                          background:'#F9FAFB', borderRadius:6, border:'1px solid #E5E7EB' }}>
+                {result.explanation}
+              </p>
+              {/* Skills */}
+              <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:16 }}>
                 <div>
-                  <h2 className="text-lg font-extrabold text-slate-900">Match Results</h2>
-                  <p className={`text-sm font-bold mt-0.5 ${c.text}`}>{c.label}</p>
+                  <p style={{ fontSize:13, fontWeight:700, color:'#15803D', marginBottom:8,
+                               display:'flex', alignItems:'center', gap:4 }}>
+                    <CheckCircle size={14} /> Matched ({result.matchedSkills.length})
+                  </p>
+                  <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+                    {result.matchedSkills.map(s => (
+                      <span key={s} className="badge badge-green">{s}</span>
+                    ))}
+                  </div>
                 </div>
-                <div className={cn('w-20 h-20 rounded-full ring-4 bg-white flex flex-col items-center justify-center shadow-lg', c.ring)}>
-                  <span className={cn('text-2xl font-extrabold', c.text)}>{pct}%</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bar */}
-            <div>
-              <div className="flex justify-between text-xs text-slate-400 mb-2 font-semibold">
-                <span>Match score</span><span>{pct}%</span>
-              </div>
-              <div className="h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                <div className={`h-full bg-gradient-to-r ${c.bar} rounded-full transition-all duration-700 shadow-sm`}
-                     style={{ width: `${pct}%` }} />
-              </div>
-            </div>
-
-            {/* Explanation */}
-            <div className="bg-gradient-to-br from-slate-50 to-indigo-50 border border-indigo-100 rounded-xl p-4 text-sm text-slate-700 leading-relaxed">
-              {result.explanation}
-            </div>
-
-            {/* Skills */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="flex items-center gap-1.5 text-sm font-extrabold text-emerald-700 mb-3">
-                  <CheckCircle size={15} /> Matched ({result.matchedSkills.length})
-                </h3>
-                <div className="flex flex-wrap gap-1.5">
-                  {result.matchedSkills.map(s => (
-                    <span key={s} className="text-xs bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full px-2.5 py-1 font-bold">{s}</span>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h3 className="flex items-center gap-1.5 text-sm font-extrabold text-rose-700 mb-3">
-                  <XCircle size={15} /> Missing ({result.missingSkills.length})
-                </h3>
-                <div className="flex flex-wrap gap-1.5">
-                  {result.missingSkills.map(s => (
-                    <span key={s} className="text-xs bg-rose-100 text-rose-700 border border-rose-200 rounded-full px-2.5 py-1 font-bold">{s}</span>
-                  ))}
+                <div>
+                  <p style={{ fontSize:13, fontWeight:700, color:'#B91C1C', marginBottom:8,
+                               display:'flex', alignItems:'center', gap:4 }}>
+                    <XCircle size={14} /> Missing ({result.missingSkills.length})
+                  </p>
+                  <div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>
+                    {result.missingSkills.map(s => (
+                      <span key={s} className="badge badge-red">{s}</span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
