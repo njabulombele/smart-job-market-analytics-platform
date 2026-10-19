@@ -67,9 +67,9 @@ export default function AdminPage() {
             style={{
               display:'flex', alignItems:'center', gap:6,
               padding:'10px 16px', fontSize:14, fontWeight:600,
-              color: tab===key ? '#2557A7' : '#6B7280',
+              color: tab===key ? '#1A7A3C' : '#6B7280',
               background:'transparent', border:'none',
-              borderBottom: tab===key ? '2px solid #2557A7' : '2px solid transparent',
+              borderBottom: tab===key ? '2px solid #1A7A3C' : '2px solid transparent',
               cursor:'pointer', transition:'color .12s',
             }}>
             <Icon size={15} />{label}
@@ -81,7 +81,7 @@ export default function AdminPage() {
       {tab === 'stats' && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {stats ? [
-            { label:'Total Jobs',  value:stats.totalJobs,  icon:Activity, bg:'#EFF6FF', color:'#1D4ED8' },
+            { label:'Total Jobs',  value:stats.totalJobs,  icon:Activity, bg:'#EFF6FF', color:'#166534' },
             { label:'Active Jobs', value:stats.activeJobs, icon:Activity, bg:'#F0FDF4', color:'#15803D' },
             { label:'Total Users', value:stats.totalUsers, icon:UserCog,  bg:'#F5F3FF', color:'#6D28D9' },
           ].map(({ label, value, icon:Icon, bg, color }) => (
@@ -123,7 +123,7 @@ export default function AdminPage() {
                     <td>
                       <div style={{ display:'flex', alignItems:'center', gap:12 }}>
                         <div style={{
-                          width:36, height:36, borderRadius:'50%', background:'#2557A7',
+                          width:36, height:36, borderRadius:'50%', background:'#1A7A3C',
                           color:'#fff', fontSize:13, fontWeight:700,
                           display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
                         }}>
@@ -179,7 +179,7 @@ export default function AdminPage() {
               <div style={{ display:'grid', gridTemplateColumns:'repeat(2,1fr)', gap:12 }}
                    className="sm:grid-cols-4">
                 {[
-                  { lbl:'Status',         val:pipeline.status,                           color:'#1D4ED8' },
+                  { lbl:'Status',         val:pipeline.status,                           color:'#166534' },
                   { lbl:'Jobs Collected', val:pipeline.jobsCollected?.toLocaleString(),   color:'#15803D' },
                   { lbl:'Last Run',       val:pipeline.lastRun ? new Date(pipeline.lastRun).toLocaleString():'—', color:'#6D28D9' },
                   { lbl:'Next Run',       val:pipeline.nextRun ? new Date(pipeline.nextRun).toLocaleString():'—', color:'#B45309' },

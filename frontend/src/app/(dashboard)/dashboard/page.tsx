@@ -10,13 +10,13 @@ import { useAuthStore } from '@/store/authStore';
 import { Briefcase, TrendingUp, MapPin, DollarSign, ArrowUpRight, Sparkles } from 'lucide-react';
 
 const STATS = [
-  { label: 'Total Jobs',      value: '124,830', delta: '+2.4%', icon: Briefcase,  bg: '#EBF2FF', color: '#2557A7' },
+  { label: 'Total Jobs',      value: '124,830', delta: '+2.4%', icon: Briefcase,  bg: '#E8F5EE', color: '#1A7A3C' },
   { label: 'Active Listings', value: '18,204',  delta: '+8.1%', icon: TrendingUp, bg: '#E6F5EC', color: '#0D7D44' },
   { label: 'Cities Covered',  value: '284',     delta: '+5',    icon: MapPin,     bg: '#F0EDFB', color: '#5B35A5' },
   { label: 'Average Salary',  value: 'R2.4M',   delta: '+R72K',  icon: DollarSign, bg: '#FFF3D6', color: '#7C4F00' },
 ];
 
-const COLORS = ['#2557A7','#5B35A5','#0D9488','#0D7D44','#7C4F00','#CC1016','#0891B2','#9333EA'];
+const COLORS = ['#1A7A3C','#5B35A5','#0D9488','#0D7D44','#7C4F00','#CC1016','#0A7A5A','#9333EA'];
 
 const Tip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
@@ -172,7 +172,8 @@ export default function DashboardPage() {
             {['1W', '1M', '3M'].map(t => (
               <button key={t} style={{
                 padding: '4px 10px', fontSize: 12, fontWeight: 700, borderRadius: 4,
-                background: t === '1M' ? 'var(--blue)' : 'transparent',
+                background: t === '1M' ? 'green' +
+                    '' : 'transparent',
                 color: t === '1M' ? '#fff' : 'var(--gray-400)',
                 border: t === '1M' ? 'none' : '1px solid var(--gray-200)',
                 cursor: 'pointer',
@@ -187,17 +188,17 @@ export default function DashboardPage() {
             <AreaChart data={activityData()} margin={{ top: 4, right: 4, bottom: 0, left: -20 }}>
               <defs>
                 <linearGradient id="aG" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%"   stopColor="#2557A7" stopOpacity={0.12} />
-                  <stop offset="100%" stopColor="#2557A7" stopOpacity={0}    />
+                  <stop offset="0%"   stopColor="#1A7A3C" stopOpacity={0.12} />
+                  <stop offset="100%" stopColor="#1A7A3C" stopOpacity={0}    />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="day" tick={{ fontSize: 10, fill: 'var(--gray-300)' }} axisLine={false} tickLine={false} />
               <YAxis tick={{ fontSize: 10, fill: 'var(--gray-300)' }} axisLine={false} tickLine={false} />
               <Tooltip content={<Tip />} />
-              <Area type="monotone" dataKey="value" stroke="#2557A7" strokeWidth={2}
+              <Area type="monotone" dataKey="value" stroke="#1A7A3C" strokeWidth={2}
                     fill="url(#aG)" dot={false}
-                    activeDot={{ r: 4, fill: '#2557A7', stroke: '#fff', strokeWidth: 2 }} />
+                    activeDot={{ r: 4, fill: '#1A7A3C', stroke: '#fff', strokeWidth: 2 }} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

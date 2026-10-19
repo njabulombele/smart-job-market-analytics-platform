@@ -9,7 +9,7 @@ import { analyticsApi } from '@/lib/api';
 import { TrendingUp, DollarSign, MapPin, BarChart3 } from 'lucide-react';
 
 const SKILLS = ['Python','Java','AWS','Kubernetes','React','Go','TypeScript','Rust'];
-const COLORS  = ['#2557A7','#7C3AED','#0D9488','#15803D','#B45309','#DC2626','#0891B2','#9333EA','#D97706','#6D28D9','#059669','#B91C1C'];
+const COLORS  = ['#1A7A3C','#7C3AED','#0D9488','#15803D','#B45309','#DC2626','#0A7A5A','#9333EA','#D97706','#6D28D9','#059669','#B91C1C'];
 
 const Tip = ({ active, payload, label }: any) => {
   if (!active || !payload?.length) return null;
@@ -59,7 +59,7 @@ export default function AnalyticsPage() {
       <div className="page-hero">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg flex items-center justify-center"
-               style={{ background: '#2557A7' }}>
+               style={{ background: '#1A7A3C' }}>
             <BarChart3 size={18} className="text-white" />
           </div>
           <div>
@@ -107,7 +107,7 @@ export default function AnalyticsPage() {
                   borderRadius: 4,
                   padding: '4px 10px',
                   fontSize: 12,
-                  background: selSkill === s ? '#2557A7' : '#F3F4F6',
+                  background: selSkill === s ? '#1A7A3C' : '#F3F4F6',
                   color: selSkill === s ? '#fff' : '#374151',
                   border: 'none',
                 }}>
@@ -124,8 +124,8 @@ export default function AnalyticsPage() {
                 <XAxis dataKey="period" tick={{ fontSize:11, fill:'#9CA3AF' }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize:11, fill:'#9CA3AF' }} axisLine={false} tickLine={false} />
                 <Tooltip content={<Tip />} />
-                <Line type="monotone" dataKey="jobCount" stroke="#2557A7" strokeWidth={2.5}
-                      dot={false} activeDot={{ r:4, fill:'#2557A7', stroke:'#fff', strokeWidth:2 }} />
+                <Line type="monotone" dataKey="jobCount" stroke="#1A7A3C" strokeWidth={2.5}
+                      dot={false} activeDot={{ r:4, fill:'#1A7A3C', stroke:'#fff', strokeWidth:2 }} />
               </LineChart>
             </ResponsiveContainer>
           ) : <p className="text-gray-400 text-sm py-10 text-center">No trend data for {selSkill}.</p>}
@@ -191,7 +191,7 @@ export default function AnalyticsPage() {
             {salary && (
               <div style={{ marginTop:16, display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
                 {[
-                  { lbl:'Minimum', val:`R${Number(salary.min).toLocaleString()}`,     color:'#1D4ED8' },
+                  { lbl:'Minimum', val:`R${Number(salary.min).toLocaleString()}`,     color:'#166534' },
                   { lbl:'Maximum', val:`R${Number(salary.max).toLocaleString()}`,     color:'#6D28D9' },
                   { lbl:'Average', val:`R${Number(salary.average).toLocaleString()}`, color:'#0D9488' },
                   { lbl:'Median',  val:`R${Number(salary.median).toLocaleString()}`,  color:'#B45309' },

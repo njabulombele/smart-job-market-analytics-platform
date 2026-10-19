@@ -17,7 +17,7 @@ const REMOTE_OPTS = ['REMOTE','HYBRID','ON_SITE'];
 const EXP_OPTS    = ['JUNIOR','MID','SENIOR','LEAD'];
 const TYPE_OPTS   = ['FULL_TIME','PART_TIME','CONTRACT','FREELANCE'];
 
-const AVATAR_COLORS = ['#2557A7','#5B35A5','#0D9488','#0D7D44','#7C4F00','#CC1016'];
+const AVATAR_COLORS = ['#1A7A3C','#5B35A5','#0D9488','#0D7D44','#7C4F00','#CC1016'];
 
 export default function JobsPage() {
   const [jobs,    setJobs]    = useState<Job[]>([]);
@@ -110,7 +110,7 @@ export default function JobsPage() {
             <span style={{
               position: 'absolute', top: -6, right: -6,
               width: 16, height: 16, borderRadius: '50%',
-              background: 'var(--blue)', color: '#fff',
+              background: 'green', color: '#fff',
               fontSize: 10, fontWeight: 700,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>

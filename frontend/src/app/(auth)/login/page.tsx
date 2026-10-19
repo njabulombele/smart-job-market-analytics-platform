@@ -61,7 +61,7 @@ export default function LoginPage() {
           {/* Brand */}
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <div style={{
-              fontSize: 32, fontWeight: 900, color: 'var(--blue)',
+              fontSize: 32, fontWeight: 900, color: 'green',
               letterSpacing: -1, marginBottom: 4,
             }}>
               Smart Job Market
@@ -149,7 +149,7 @@ export default function LoginPage() {
 
             <div style={{ textAlign: 'center', marginTop: 16 }}>
               <Link href="/login"
-                style={{ fontSize: 13, color: 'var(--blue)', fontWeight: 600 }}>
+                style={{ fontSize: 13, color: 'green', fontWeight: 600 }}>
                 Forgot password?
               </Link>
             </div>
@@ -167,7 +167,8 @@ export default function LoginPage() {
             <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--gray-600)' }}>
               New to Smart Job Market?{' '}
               <Link href="/register"
-                style={{ color: 'var(--blue)', fontWeight: 700 }}>
+                style={{ color: 'green' +
+                      '', fontWeight: 700 }}>
                 Create an account
               </Link>
             </p>

@@ -4,10 +4,9 @@
 
 /* ════════════════════════════════════════════════════════════
    Smart Job Market  ·  Design System
-   Modelled on Indeed.com
    ──────────────────────────────────────────────────────────
    • Pure white page background
-   • Indeed blue  #2557A7  (primary action)
+   • Brand green  #1A7A3C  (primary action)
    • Dark navy    #161722  (headings)
    • Neutral grays for body + meta text
    • 4-pt spacing grid
@@ -15,11 +14,11 @@
 
 @layer base {
   :root {
-    /* Brand */
-    --blue:        #2557A7;
-    --blue-hover:  #1B3F7A;
-    --blue-light:  #EBF2FF;
-    --blue-border: #BBCEF0;
+    /* Brand — green replaces blue everywhere */
+    --blue:        #1A7A3C;
+    --blue-hover:  #145E2E;
+    --blue-light:  #E8F5EE;
+    --blue-border: #A8D8BC;
 
     /* Page palette */
     --white:   #FFFFFF;

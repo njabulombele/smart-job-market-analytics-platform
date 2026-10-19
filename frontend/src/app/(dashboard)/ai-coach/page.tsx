@@ -67,13 +67,13 @@ export default function AiCoachPage() {
           <div key={i} style={{ display:'flex', gap:10, flexDirection: m.role==='user' ? 'row-reverse' : 'row' }}>
             <div style={{
               width:32, height:32, borderRadius:m.role==='assistant'?8:'50%',
-              background: m.role==='assistant' ? '#FEF2F2' : '#EBF2FF',
-              border: `1px solid ${m.role==='assistant'?'#FECACA':'#BBCEF0'}`,
+              background: m.role==='assistant' ? '#FEF2F2' : '#E8F5EE',
+              border: `1px solid ${m.role==='assistant'?'#FECACA':'#A8D8BC'}`,
               display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0, alignSelf:'flex-end',
             }}>
               {m.role==='assistant'
                 ? <Bot size={15} color="#DC2626" />
-                : <User size={15} color="#2557A7" />}
+                : <User size={15} color="#1A7A3C" />}
             </div>
             <div className={m.role==='assistant' ? 'bubble-bot' : 'bubble-user'}
                  style={{ whiteSpace:'pre-wrap' }}>

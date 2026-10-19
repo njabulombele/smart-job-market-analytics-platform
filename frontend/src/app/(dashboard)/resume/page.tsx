@@ -58,9 +58,9 @@ export default function ResumePage() {
             onDrop={e => { e.preventDefault(); setDragging(false); const f=e.dataTransfer.files[0]; if(f) setFile(f); }}
             style={{
               display:'flex', flexDirection:'column', alignItems:'center',
-              justifyContent:'center', border:`2px dashed ${dragging?'#2557A7':file?'#15803D':'#D1D5DB'}`,
+              justifyContent:'center', border:`2px dashed ${dragging?'#1A7A3C':file?'#15803D':'#D1D5DB'}`,
               borderRadius:8, padding:'32px', cursor:'pointer',
-              background: dragging?'#EBF2FF':file?'#F0FDF4':'#F9FAFB',
+              background: dragging?'#E8F5EE':file?'#F0FDF4':'#F9FAFB',
               transition:'all .15s',
             }}>
             {file ? (

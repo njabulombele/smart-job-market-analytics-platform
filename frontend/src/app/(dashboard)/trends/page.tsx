@@ -6,7 +6,7 @@ import { analyticsApi } from '@/lib/api';
 import { TrendingUp } from 'lucide-react';
 
 const SKILLS = ['Python','Java','TypeScript','Go','Rust','AWS','Kubernetes','React'];
-const COLORS  = ['#2557A7','#15803D','#B45309','#7C3AED','#DC2626','#0D9488','#9333EA','#6D28D9'];
+const COLORS  = ['#1A7A3C','#15803D','#B45309','#7C3AED','#DC2626','#0D9488','#9333EA','#6D28D9'];
 
 export default function TrendsPage() {
   const [data,     setData]     = useState<Record<string,any[]>>({});
