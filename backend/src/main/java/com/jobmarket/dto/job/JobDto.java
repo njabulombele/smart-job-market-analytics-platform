@@ -1,5 +1,6 @@
 package com.jobmarket.dto.job;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Set;
@@ -22,4 +23,4 @@ public record JobDto(
     Set<String> skills,
     OffsetDateTime postedAt,
     int viewCount
-) {}
+) implements Serializable {}

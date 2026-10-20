@@ -1,3 +1,6 @@
 package com.jobmarket.dto.analytics;
 
-public record TrendDataDto(String period, long jobCount, double changePercent) {}
+import java.io.Serializable;
+
+public record TrendDataDto(String period, long jobCount, double changePercent)
+    implements Serializable {}

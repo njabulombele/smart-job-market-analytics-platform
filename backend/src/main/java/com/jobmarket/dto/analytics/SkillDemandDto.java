@@ -1,3 +1,6 @@
 package com.jobmarket.dto.analytics;
 
-public record SkillDemandDto(String skill, String category, long jobCount, double percentChange) {}
+import java.io.Serializable;
+
+public record SkillDemandDto(String skill, String category, long jobCount, double percentChange)
+    implements Serializable {}

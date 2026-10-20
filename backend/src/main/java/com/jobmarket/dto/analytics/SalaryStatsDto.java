@@ -1,5 +1,6 @@
 package com.jobmarket.dto.analytics;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 public record SalaryStatsDto(
@@ -10,4 +11,4 @@ public record SalaryStatsDto(
     BigDecimal average,
     BigDecimal median,
     long sampleSize
-) {}
+) implements Serializable {}
